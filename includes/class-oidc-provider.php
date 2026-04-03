@@ -220,7 +220,10 @@ class WP_OIDC_Provider {
 			$params['state'] = $state;
 		}
 
-		wp_safe_redirect( add_query_arg( $params, $redirect_uri ) );
+		// Use wp_redirect (not wp_safe_redirect) because redirect_uri may be on a
+		// different host/port. It has already been validated against the registered
+		// URIs for this client, so the redirect is safe.
+		wp_redirect( add_query_arg( $params, $redirect_uri ) ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
 		exit;
 	}
 
@@ -435,7 +438,9 @@ class WP_OIDC_Provider {
 		if ( $state ) {
 			$params['state'] = $state;
 		}
-		wp_safe_redirect( add_query_arg( $params, $redirect_uri ) );
+		// Use wp_redirect (not wp_safe_redirect) — redirect_uri is already validated
+		// against the registered list and may point to an external host.
+		wp_redirect( add_query_arg( $params, $redirect_uri ) ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
 		exit;
 	}
 }
