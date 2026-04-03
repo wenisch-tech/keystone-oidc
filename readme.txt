@@ -1,5 +1,5 @@
 === WP OIDC Provider ===
-Contributors: jfwenisch
+Contributors: wenisch-tech
 Tags: oidc, openid-connect, sso, authentication, oauth2
 Requires at least: 5.6
 Tested up to: 6.7
@@ -49,7 +49,7 @@ WP OIDC Provider transforms your WordPress installation into a fully-featured **
 2. Activate the plugin through the **Plugins** menu
 3. Navigate to **OIDC Provider** in the admin sidebar to create your first client
 
-Alternatively, download the `wp-oidcprovider.zip` from the [GitHub Releases](https://github.com/JFWenisch/wp-oidcserver/releases) page and upload it via **Plugins → Add New → Upload Plugin**.
+Alternatively, download the `wp-oidcprovider.zip` from the [GitHub Releases](https://github.com/wenisch-tech/wp-oidcprovider/releases) page and upload it via **Plugins → Add New → Upload Plugin**.
 
 == Frequently Asked Questions ==
 
