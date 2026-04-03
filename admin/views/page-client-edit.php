@@ -114,7 +114,7 @@ $title = $is_edit
 				<tr>
 					<th><?php esc_html_e( 'Discovery URL', 'wp-oidcprovider' ); ?></th>
 					<td>
-						<code id="discovery-url"><?php echo esc_html( trailingslashit( get_bloginfo( 'url' ) ) . '.well-known/openid-configuration' ); ?></code>
+						<code id="discovery-url"><?php echo esc_html( WP_OIDC_Provider::get_endpoint_url( '.well-known/openid-configuration' ) ); ?></code>
 						<button type="button" class="button button-small wp-oidc-copy-btn" data-target="discovery-url">
 							<?php esc_html_e( 'Copy', 'wp-oidcprovider' ); ?>
 						</button>

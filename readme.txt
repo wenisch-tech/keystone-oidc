@@ -20,7 +20,7 @@ WP OIDC Provider transforms your WordPress installation into a fully-featured **
 * **RS256 JWT** signed access tokens and ID tokens
 * **Admin UI** to create and manage multiple OIDC clients
 * **Client secret management** – generate and reset secrets securely (shown only once)
-* **OIDC Discovery** endpoint (`/.well-known/openid-configuration`) for automatic client configuration
+* **OIDC Discovery** endpoint (`/wenisch-tech/wp-oidcprovider/.well-known/openid-configuration`) for automatic client configuration
 * **Standard scopes**: `openid`, `profile`, `email`
 * **Refresh tokens** for long-lived sessions
 * **Zero additional configuration** after install – just create a client and you're ready
@@ -29,11 +29,11 @@ WP OIDC Provider transforms your WordPress installation into a fully-featured **
 
 | Endpoint | URL |
 |---|---|
-| Discovery | `/.well-known/openid-configuration` |
-| Authorization | `/oauth/authorize` |
-| Token | `/oauth/token` |
-| UserInfo | `/oauth/userinfo` |
-| JWKS | `/oauth/jwks` |
+| Discovery | `/wenisch-tech/wp-oidcprovider/.well-known/openid-configuration` |
+| Authorization | `/wenisch-tech/wp-oidcprovider/oauth/authorize` |
+| Token | `/wenisch-tech/wp-oidcprovider/oauth/token` |
+| UserInfo | `/wenisch-tech/wp-oidcprovider/oauth/userinfo` |
+| JWKS | `/wenisch-tech/wp-oidcprovider/oauth/jwks` |
 
 = Quick Start =
 
