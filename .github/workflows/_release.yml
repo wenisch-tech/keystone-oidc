@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      tag:
+        required: true
+        type: string
+      changelog:
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update plugin version in PHP header
+        run: |
+          VERSION="${{ inputs.version }}"
+          sed -i "s/^ \* Version:.*/ * Version: ${VERSION}/" wp-oidcserver.php
+          sed -i "s/define( 'WP_OIDC_VERSION', '[^']*' )/define( 'WP_OIDC_VERSION', '${VERSION}' )/" wp-oidcserver.php
+
+      - name: Update stable tag in readme.txt
+        run: |
+          VERSION="${{ inputs.version }}"
+          sed -i "s/^Stable tag:.*/Stable tag: ${VERSION}/" readme.txt
+
+      - name: Create plugin ZIP
+        run: |
+          VERSION="${{ inputs.version }}"
+          PLUGIN_DIR="wp-oidcserver"
+          ARCHIVE="wp-oidcserver-${VERSION}.zip"
+
+          mkdir -p "/tmp/${PLUGIN_DIR}"
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.gitignore' \
+            --exclude='*.zip' \
+            . "/tmp/${PLUGIN_DIR}/"
+
+          (cd /tmp && zip -r "${GITHUB_WORKSPACE}/${ARCHIVE}" "${PLUGIN_DIR}")
+
+          echo "archive=${ARCHIVE}" >> "$GITHUB_ENV"
+          echo "Created ${ARCHIVE}"
+          ls -lh "${ARCHIVE}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: WP OIDC Server ${{ inputs.tag }}
+          body: |
+            ## WP OIDC Server ${{ inputs.tag }}
+
+            ${{ inputs.changelog }}
+
+            ### Installation
+
+            1. Download `wp-oidcserver-${{ inputs.version }}.zip` below
+            2. In your WordPress admin go to **Plugins → Add New → Upload Plugin**
+            3. Upload the ZIP file and activate the plugin
+            4. Navigate to **OIDC Server** in the admin sidebar to create your first client
+
+            ### What's included
+
+            - Authorization Code Flow with PKCE support
+            - RS256 JWT signed tokens
+            - Admin UI for client management
+            - OIDC Discovery endpoint
+            - Refresh token support
+          files: ${{ env.archive }}
+          draft: false
+          prerelease: false
