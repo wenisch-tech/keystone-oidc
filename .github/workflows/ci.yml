@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+permissions:
+  contents: read
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Orchestrator: computes version/tag on every push, then delegates to the
+# reusable release workflow when merging to main.
+#   _release.yml — version bump, zip build, GitHub release
+# ─────────────────────────────────────────────────────────────────────────────
+
+jobs:
+  versioning:
+    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip ci]')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.tag_version.outputs.new_tag }}
+      version: ${{ steps.version.outputs.version }}
+      changelog: ${{ steps.tag_version.outputs.changelog }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump version and generate changelog
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ github.token }}
+          release_branches: main
+          default_bump: patch
+          dry_run: ${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}
+
+      - name: Derive plugin version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ steps.tag_version.outputs.new_tag }}"
+
+          if [ -z "$tag" ]; then
+            tag="v0.0.1"
+          fi
+
+          version="${tag#v}"
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            version="${version}-pr.${{ github.event.number }}.${{ github.run_number }}"
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[skip ci]')
+    needs:
+      - versioning
+    permissions:
+      contents: write
+    uses: ./.github/workflows/_release.yml
+    with:
+      version: ${{ needs.versioning.outputs.version }}
+      tag: ${{ needs.versioning.outputs.tag }}
+      changelog: ${{ needs.versioning.outputs.changelog }}
+    secrets: inherit
