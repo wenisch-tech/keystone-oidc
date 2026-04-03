@@ -11,6 +11,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class WP_OIDC_Provider {
+	const ENDPOINT_BASE_PATH = 'wenisch-tech/wp-oidcprovider';
+
+	/**
+	 * Get endpoint base path relative to site root.
+	 *
+	 * @return string
+	 */
+	public static function get_endpoint_base_path() {
+		return trailingslashit( self::ENDPOINT_BASE_PATH );
+	}
+
+	/**
+	 * Build an absolute endpoint URL.
+	 *
+	 * @param string $relative_path Endpoint path relative to the endpoint base path.
+	 * @return string
+	 */
+	public static function get_endpoint_url( $relative_path ) {
+		$site_base = trailingslashit( get_bloginfo( 'url' ) );
+		return $site_base . self::get_endpoint_base_path() . ltrim( $relative_path, '/' );
+	}
 
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_rewrite_rules' ) );
@@ -49,11 +70,13 @@ class WP_OIDC_Provider {
 	 * Register OIDC rewrite rules (static, so activation can call it too).
 	 */
 	public static function register_rewrite_rules_static() {
-		add_rewrite_rule( '^\.well-known/openid-configuration$', 'index.php?oidc_endpoint=discovery', 'top' );
-		add_rewrite_rule( '^oauth/authorize/?$', 'index.php?oidc_endpoint=authorize', 'top' );
-		add_rewrite_rule( '^oauth/token/?$', 'index.php?oidc_endpoint=token', 'top' );
-		add_rewrite_rule( '^oauth/userinfo/?$', 'index.php?oidc_endpoint=userinfo', 'top' );
-		add_rewrite_rule( '^oauth/jwks/?$', 'index.php?oidc_endpoint=jwks', 'top' );
+		$endpoint_base = untrailingslashit( self::get_endpoint_base_path() );
+
+		add_rewrite_rule( '^' . $endpoint_base . '/\.well-known/openid-configuration/?$', 'index.php?oidc_endpoint=discovery', 'top' );
+		add_rewrite_rule( '^' . $endpoint_base . '/oauth/authorize/?$', 'index.php?oidc_endpoint=authorize', 'top' );
+		add_rewrite_rule( '^' . $endpoint_base . '/oauth/token/?$', 'index.php?oidc_endpoint=token', 'top' );
+		add_rewrite_rule( '^' . $endpoint_base . '/oauth/userinfo/?$', 'index.php?oidc_endpoint=userinfo', 'top' );
+		add_rewrite_rule( '^' . $endpoint_base . '/oauth/jwks/?$', 'index.php?oidc_endpoint=jwks', 'top' );
 	}
 
 	/**
@@ -102,15 +125,14 @@ class WP_OIDC_Provider {
 	// -------------------------------------------------------------------------
 
 	private function handle_discovery() {
-		$issuer   = WP_OIDC_Token_Manager::get_issuer();
-		$base_url = trailingslashit( get_bloginfo( 'url' ) );
+		$issuer = WP_OIDC_Token_Manager::get_issuer();
 
 		$discovery = array(
 			'issuer'                                => $issuer,
-			'authorization_endpoint'                => $base_url . 'oauth/authorize',
-			'token_endpoint'                        => $base_url . 'oauth/token',
-			'userinfo_endpoint'                     => $base_url . 'oauth/userinfo',
-			'jwks_uri'                              => $base_url . 'oauth/jwks',
+			'authorization_endpoint'                => self::get_endpoint_url( 'oauth/authorize' ),
+			'token_endpoint'                        => self::get_endpoint_url( 'oauth/token' ),
+			'userinfo_endpoint'                     => self::get_endpoint_url( 'oauth/userinfo' ),
+			'jwks_uri'                              => self::get_endpoint_url( 'oauth/jwks' ),
 			'scopes_supported'                      => array( 'openid', 'profile', 'email' ),
 			'response_types_supported'              => array( 'code' ),
 			'grant_types_supported'                 => array( 'authorization_code', 'refresh_token' ),
@@ -165,7 +187,7 @@ class WP_OIDC_Provider {
 
 		// Require user to be logged in.
 		if ( ! is_user_logged_in() ) {
-			$authorize_url = add_query_arg( $_GET, trailingslashit( get_bloginfo( 'url' ) ) . 'oauth/authorize' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$authorize_url = add_query_arg( $_GET, self::get_endpoint_url( 'oauth/authorize' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			wp_safe_redirect( wp_login_url( $authorize_url ) );
 			exit;
 		}

@@ -42,7 +42,7 @@ No external identity provider or third-party service is required.
 | ✅ | **PKCE** – S256 and plain code-challenge methods (RFC 7636) |
 | ✅ | **RS256 JWT** signed access tokens and ID tokens |
 | ✅ | **Refresh tokens** with single-use rotation |
-| ✅ | **OIDC Discovery** document (`/.well-known/openid-configuration`) for zero-config clients |
+| ✅ | **OIDC Discovery** document (`/wenisch-tech/wp-oidcprovider/.well-known/openid-configuration`) for zero-config clients |
 | ✅ | **JWKS endpoint** so clients can verify tokens without any shared secret |
 | ✅ | **Multi-client management** – create and manage as many clients as needed |
 | ✅ | **Client secret reset** – secrets shown only once, stored hashed |
@@ -108,7 +108,7 @@ Click **Create Client**. You will be shown the **Client ID** and **Client Secret
 Point your OIDC client library at the discovery URL:
 
 ```
-https://your-wordpress-site.example.com/.well-known/openid-configuration
+https://your-wordpress-site.example.com/wenisch-tech/wp-oidcprovider/.well-known/openid-configuration
 ```
 
 Most OIDC libraries (e.g. `openid-client` for Node.js, `python-jose`, Keycloak adapters, Dex, etc.) will read this document and configure all endpoints automatically.
@@ -171,7 +171,7 @@ Displays read-only information about the server:
 ```
  Client App                WordPress (OIDC Provider)           User
      │                             │                             │
-     │── GET /oauth/authorize ──── │                             │
+    │── GET /wenisch-tech/wp-oidcprovider/oauth/authorize ──── │                             │
      │   ?response_type=code       │                             │
      │   &client_id=…              │                             │
      │   &redirect_uri=…           │                             │
@@ -189,7 +189,7 @@ Displays read-only information about the server:
      │◄── redirect to redirect_uri │                             │
      │    ?code=…&state=…          │                             │
      │                             │                             │
-     │── POST /oauth/token ─────── │                             │
+    │── POST /wenisch-tech/wp-oidcprovider/oauth/token ─────── │                             │
      │   grant_type=authorization_code                           │
      │   code=… redirect_uri=…     │                             │
      │   client_id=… client_secret=│                             │
@@ -197,19 +197,19 @@ Displays read-only information about the server:
      │◄── access_token + id_token  │                             │
      │    + refresh_token ──────── │                             │
      │                             │                             │
-     │── GET /oauth/userinfo ────── │                             │
+    │── GET /wenisch-tech/wp-oidcprovider/oauth/userinfo ────── │                             │
      │   Authorization: Bearer …   │                             │
      │                             │                             │
      │◄── { sub, name, email, … }  │                             │
 ```
 
-1. The client redirects the browser to `/oauth/authorize` with the standard parameters.
+1. The client redirects the browser to `/wenisch-tech/wp-oidcprovider/oauth/authorize` with the standard parameters.
 2. If the user is not logged in, WordPress's own login flow handles authentication and then redirects back to the authorize endpoint.
 3. A consent screen lists the scopes being requested and asks the user to **Allow** or **Deny**.
 4. On approval, a short-lived **authorization code** (valid 10 minutes, single-use) is issued and the browser is redirected to the client's `redirect_uri`.
-5. The client's back-end exchanges the code for tokens by calling `/oauth/token` (server-to-server).
+5. The client's back-end exchanges the code for tokens by calling `/wenisch-tech/wp-oidcprovider/oauth/token` (server-to-server).
 6. The plugin returns an **access token** (RS256 JWT), an **ID token** (RS256 JWT), and a **refresh token**.
-7. The client can call `/oauth/userinfo` at any time with the Bearer access token to retrieve up-to-date user claims.
+7. The client can call `/wenisch-tech/wp-oidcprovider/oauth/userinfo` at any time with the Bearer access token to retrieve up-to-date user claims.
 
 ### Token lifetimes
 
@@ -230,7 +230,7 @@ When the authorization request includes a `code_challenge`, the plugin stores it
 
 ### Signing keys
 
-On activation the plugin generates an RSA-2048 key pair using PHP's `openssl` extension. The private key is stored in the WordPress options table. The public key is published through the JWKS endpoint (`/oauth/jwks`) so that any client or resource server can verify tokens independently without trusting the plugin directly.
+On activation the plugin generates an RSA-2048 key pair using PHP's `openssl` extension. The private key is stored in the WordPress options table. The public key is published through the JWKS endpoint (`/wenisch-tech/wp-oidcprovider/oauth/jwks`) so that any client or resource server can verify tokens independently without trusting the plugin directly.
 
 The key ID (`kid`) in each JWT header lets clients efficiently look up the correct key from the JWKS when multiple keys are present during rotation.
 
@@ -253,23 +253,23 @@ All URLs are relative to your WordPress site root (e.g. `https://example.com`).
 
 | Endpoint | Method | Path |
 |---|---|---|
-| **Discovery** | GET | `/.well-known/openid-configuration` |
-| **Authorization** | GET / POST | `/oauth/authorize` |
-| **Token** | POST | `/oauth/token` |
-| **UserInfo** | GET | `/oauth/userinfo` |
-| **JWKS** | GET | `/oauth/jwks` |
+| **Discovery** | GET | `/wenisch-tech/wp-oidcprovider/.well-known/openid-configuration` |
+| **Authorization** | GET / POST | `/wenisch-tech/wp-oidcprovider/oauth/authorize` |
+| **Token** | POST | `/wenisch-tech/wp-oidcprovider/oauth/token` |
+| **UserInfo** | GET | `/wenisch-tech/wp-oidcprovider/oauth/userinfo` |
+| **JWKS** | GET | `/wenisch-tech/wp-oidcprovider/oauth/jwks` |
 
-### `GET /.well-known/openid-configuration`
+### `GET /wenisch-tech/wp-oidcprovider/.well-known/openid-configuration`
 
 Returns the [OIDC Discovery document](https://openid.net/specs/openid-connect-discovery-1_0.html) as JSON. Point your OIDC client library at this URL for automatic configuration.
 
 ```json
 {
   "issuer": "https://example.com",
-  "authorization_endpoint": "https://example.com/oauth/authorize",
-  "token_endpoint": "https://example.com/oauth/token",
-  "userinfo_endpoint": "https://example.com/oauth/userinfo",
-  "jwks_uri": "https://example.com/oauth/jwks",
+  "authorization_endpoint": "https://example.com/wenisch-tech/wp-oidcprovider/oauth/authorize",
+  "token_endpoint": "https://example.com/wenisch-tech/wp-oidcprovider/oauth/token",
+  "userinfo_endpoint": "https://example.com/wenisch-tech/wp-oidcprovider/oauth/userinfo",
+  "jwks_uri": "https://example.com/wenisch-tech/wp-oidcprovider/oauth/jwks",
   "scopes_supported": ["openid", "profile", "email"],
   "response_types_supported": ["code"],
   "grant_types_supported": ["authorization_code", "refresh_token"],
@@ -279,7 +279,7 @@ Returns the [OIDC Discovery document](https://openid.net/specs/openid-connect-di
 }
 ```
 
-### `GET /oauth/authorize`
+### `GET /wenisch-tech/wp-oidcprovider/oauth/authorize`
 
 Starts the authorization flow. Required parameters:
 
@@ -294,7 +294,7 @@ Starts the authorization flow. Required parameters:
 | `code_challenge` | PKCE | Base64url-encoded challenge |
 | `code_challenge_method` | PKCE | `S256` or `plain` |
 
-### `POST /oauth/token`
+### `POST /wenisch-tech/wp-oidcprovider/oauth/token`
 
 Exchanges an authorization code or refresh token for tokens.
 
@@ -333,7 +333,7 @@ Exchanges an authorization code or refresh token for tokens.
 }
 ```
 
-### `GET /oauth/userinfo`
+### `GET /wenisch-tech/wp-oidcprovider/oauth/userinfo`
 
 Returns claims for the authenticated user. Requires a valid Bearer token.
 
@@ -341,7 +341,7 @@ Returns claims for the authenticated user. Requires a valid Bearer token.
 Authorization: Bearer <access_token>
 ```
 
-### `GET /oauth/jwks`
+### `GET /wenisch-tech/wp-oidcprovider/oauth/jwks`
 
 Returns the public RSA key in [JWKS format](https://datatracker.ietf.org/doc/html/rfc7517). Use this to verify RS256-signed JWTs without contacting the token endpoint.
 

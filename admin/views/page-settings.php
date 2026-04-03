@@ -39,23 +39,23 @@ $kid    = WP_OIDC_Token_Manager::get_key_id();
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'Discovery Endpoint', 'wp-oidcprovider' ); ?></th>
-				<td><code><?php echo esc_html( trailingslashit( get_bloginfo( 'url' ) ) . '.well-known/openid-configuration' ); ?></code></td>
+				<td><code><?php echo esc_html( WP_OIDC_Provider::get_endpoint_url( '.well-known/openid-configuration' ) ); ?></code></td>
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'Authorization Endpoint', 'wp-oidcprovider' ); ?></th>
-				<td><code><?php echo esc_html( trailingslashit( get_bloginfo( 'url' ) ) . 'oauth/authorize' ); ?></code></td>
+				<td><code><?php echo esc_html( WP_OIDC_Provider::get_endpoint_url( 'oauth/authorize' ) ); ?></code></td>
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'Token Endpoint', 'wp-oidcprovider' ); ?></th>
-				<td><code><?php echo esc_html( trailingslashit( get_bloginfo( 'url' ) ) . 'oauth/token' ); ?></code></td>
+				<td><code><?php echo esc_html( WP_OIDC_Provider::get_endpoint_url( 'oauth/token' ) ); ?></code></td>
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'UserInfo Endpoint', 'wp-oidcprovider' ); ?></th>
-				<td><code><?php echo esc_html( trailingslashit( get_bloginfo( 'url' ) ) . 'oauth/userinfo' ); ?></code></td>
+				<td><code><?php echo esc_html( WP_OIDC_Provider::get_endpoint_url( 'oauth/userinfo' ) ); ?></code></td>
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'JWKS URI', 'wp-oidcprovider' ); ?></th>
-				<td><code><?php echo esc_html( trailingslashit( get_bloginfo( 'url' ) ) . 'oauth/jwks' ); ?></code></td>
+				<td><code><?php echo esc_html( WP_OIDC_Provider::get_endpoint_url( 'oauth/jwks' ) ); ?></code></td>
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'Current Key ID (kid)', 'wp-oidcprovider' ); ?></th>

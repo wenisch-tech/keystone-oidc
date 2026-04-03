@@ -30,7 +30,7 @@ $deleted = isset( $_GET['deleted'] ) && '1' === $_GET['deleted'];
 	<div class="wp-oidc-info-banner">
 		<p>
 			<strong><?php esc_html_e( 'Discovery URL:', 'wp-oidcprovider' ); ?></strong>
-			<code><?php echo esc_html( trailingslashit( get_bloginfo( 'url' ) ) . '.well-known/openid-configuration' ); ?></code>
+			<code><?php echo esc_html( WP_OIDC_Provider::get_endpoint_url( '.well-known/openid-configuration' ) ); ?></code>
 		</p>
 		<p class="description">
 			<?php esc_html_e( 'Share this URL with your OIDC client applications so they can auto-configure the endpoints.', 'wp-oidcprovider' ); ?>
