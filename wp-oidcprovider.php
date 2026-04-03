@@ -1,12 +1,12 @@
 <?php
 /**
  * Plugin Name: WP OIDC Provider
- * Plugin URI: https://github.com/JFWenisch/wp-oidcserver
+ * Plugin URI: https://github.com/wenisch-tech/wp-oidcprovider
  * Description: Turn your WordPress site into an OpenID Connect (OIDC) identity provider. Manage clients through the admin panel.
  * Version: 1.0.0
  * Requires at least: 5.6
  * Requires PHP: 7.4
- * Author: JFWenisch
+ * Author: wenisch-tech
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: wp-oidcprovider

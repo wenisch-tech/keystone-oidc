@@ -2,7 +2,7 @@
 
 > Turn your WordPress site into a fully featured **OpenID Connect (OIDC) identity provider**.
 
-[![Release](https://github.com/JFWenisch/wp-oidcserver/actions/workflows/ci.yml/badge.svg)](https://github.com/JFWenisch/wp-oidcserver/actions/workflows/ci.yml)
+[![Release](https://github.com/wenisch-tech/wp-oidcprovider/actions/workflows/ci.yml/badge.svg)](https://github.com/wenisch-tech/wp-oidcprovider/actions/workflows/ci.yml)
 
 WP OIDC Provider is a WordPress plugin that exposes standard OIDC / OAuth 2.0 endpoints so that other applications — dashboards, CLIs, mobile apps, or any OIDC-aware tool — can authenticate users against your existing WordPress user database.  
 No external identity provider or third-party service is required.
@@ -69,7 +69,7 @@ Pretty permalinks must be **enabled** in WordPress (`Settings → Permalinks`). 
 
 ### Option A – Upload the ZIP (recommended)
 
-1. Download the latest `wp-oidcprovider-x.y.z.zip` from the [Releases page](https://github.com/JFWenisch/wp-oidcserver/releases).
+1. Download the latest `wp-oidcprovider-x.y.z.zip` from the [Releases page](https://github.com/wenisch-tech/wp-oidcprovider/releases).
 2. In your WordPress admin go to **Plugins → Add New → Upload Plugin**.
 3. Choose the downloaded ZIP and click **Install Now**.
 4. Click **Activate Plugin**.
