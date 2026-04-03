@@ -1,0 +1,20 @@
+# WordPress artifacts
+*.zip
+
+# Dependency directories (if any build tools added later)
+vendor/
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.log
