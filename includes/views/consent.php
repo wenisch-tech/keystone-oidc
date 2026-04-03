@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title><?php esc_html_e( 'Authorize Application', 'wp-oidcserver' ); ?> &mdash; <?php echo esc_html( get_bloginfo( 'name' ) ); ?></title>
+	<title><?php esc_html_e( 'Authorize Application', 'wp-oidcprovider' ); ?> &mdash; <?php echo esc_html( get_bloginfo( 'name' ) ); ?></title>
 	<style>
 		*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 		body {
@@ -104,14 +104,14 @@
 		<?php
 		printf(
 			/* translators: %s: site name */
-			esc_html__( 'wants to access your %s account', 'wp-oidcserver' ),
+			esc_html__( 'wants to access your %s account', 'wp-oidcprovider' ),
 			'<strong>' . esc_html( get_bloginfo( 'name' ) ) . '</strong>'
 		);
 		?>
 	</p>
 
 	<div class="scopes">
-		<h2><?php esc_html_e( 'This application will be able to:', 'wp-oidcserver' ); ?></h2>
+		<h2><?php esc_html_e( 'This application will be able to:', 'wp-oidcprovider' ); ?></h2>
 		<?php foreach ( $requested_scopes as $s ) : ?>
 			<?php if ( isset( $scope_labels[ $s ] ) ) : ?>
 				<div class="scope-item"><?php echo esc_html( $scope_labels[ $s ] ); ?></div>
@@ -123,7 +123,7 @@
 		<?php
 		printf(
 			/* translators: %s: username */
-			esc_html__( 'Signed in as %s', 'wp-oidcserver' ),
+			esc_html__( 'Signed in as %s', 'wp-oidcprovider' ),
 			'<strong>' . esc_html( $user->user_login ) . '</strong>'
 		);
 		?>
@@ -140,16 +140,16 @@
 		<?php endif; ?>
 		<div class="actions">
 			<button type="submit" name="authorize" value="deny" class="btn btn-secondary">
-				<?php esc_html_e( 'Deny', 'wp-oidcserver' ); ?>
+				<?php esc_html_e( 'Deny', 'wp-oidcprovider' ); ?>
 			</button>
 			<button type="submit" name="authorize" value="allow" class="btn btn-primary">
-				<?php esc_html_e( 'Allow Access', 'wp-oidcserver' ); ?>
+				<?php esc_html_e( 'Allow Access', 'wp-oidcprovider' ); ?>
 			</button>
 		</div>
 	</form>
 
 	<p class="notice">
-		<?php esc_html_e( 'You can revoke this access at any time from your account settings.', 'wp-oidcserver' ); ?>
+		<?php esc_html_e( 'You can revoke this access at any time from your account settings.', 'wp-oidcprovider' ); ?>
 	</p>
 </div>
 </body>

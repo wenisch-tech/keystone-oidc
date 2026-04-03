@@ -15,46 +15,46 @@ $deleted = isset( $_GET['deleted'] ) && '1' === $_GET['deleted'];
 // phpcs:enable
 ?>
 <div class="wrap wp-oidc-wrap">
-	<h1 class="wp-heading-inline"><?php esc_html_e( 'OIDC Clients', 'wp-oidcserver' ); ?></h1>
+	<h1 class="wp-heading-inline"><?php esc_html_e( 'OIDC Clients', 'wp-oidcprovider' ); ?></h1>
 	<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-oidc-add-client' ) ); ?>" class="page-title-action">
-		<?php esc_html_e( '+ Add Client', 'wp-oidcserver' ); ?>
+		<?php esc_html_e( '+ Add Client', 'wp-oidcprovider' ); ?>
 	</a>
 	<hr class="wp-header-end">
 
 	<?php if ( $deleted ) : ?>
 		<div class="notice notice-success is-dismissible">
-			<p><?php esc_html_e( 'Client deleted successfully.', 'wp-oidcserver' ); ?></p>
+			<p><?php esc_html_e( 'Client deleted successfully.', 'wp-oidcprovider' ); ?></p>
 		</div>
 	<?php endif; ?>
 
 	<div class="wp-oidc-info-banner">
 		<p>
-			<strong><?php esc_html_e( 'Discovery URL:', 'wp-oidcserver' ); ?></strong>
+			<strong><?php esc_html_e( 'Discovery URL:', 'wp-oidcprovider' ); ?></strong>
 			<code><?php echo esc_html( trailingslashit( get_bloginfo( 'url' ) ) . '.well-known/openid-configuration' ); ?></code>
 		</p>
 		<p class="description">
-			<?php esc_html_e( 'Share this URL with your OIDC client applications so they can auto-configure the endpoints.', 'wp-oidcserver' ); ?>
+			<?php esc_html_e( 'Share this URL with your OIDC client applications so they can auto-configure the endpoints.', 'wp-oidcprovider' ); ?>
 		</p>
 	</div>
 
 	<?php if ( empty( $clients ) ) : ?>
 		<div class="wp-oidc-empty-state">
 			<span class="dashicons dashicons-shield" style="font-size:64px;width:64px;height:64px;color:#ccd0d4;"></span>
-			<h2><?php esc_html_e( 'No clients yet', 'wp-oidcserver' ); ?></h2>
-			<p><?php esc_html_e( 'Create your first OIDC client to get started.', 'wp-oidcserver' ); ?></p>
+			<h2><?php esc_html_e( 'No clients yet', 'wp-oidcprovider' ); ?></h2>
+			<p><?php esc_html_e( 'Create your first OIDC client to get started.', 'wp-oidcprovider' ); ?></p>
 			<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-oidc-add-client' ) ); ?>" class="button button-primary button-hero">
-				<?php esc_html_e( 'Add Your First Client', 'wp-oidcserver' ); ?>
+				<?php esc_html_e( 'Add Your First Client', 'wp-oidcprovider' ); ?>
 			</a>
 		</div>
 	<?php else : ?>
 		<table class="wp-list-table widefat fixed striped">
 			<thead>
 				<tr>
-					<th scope="col" class="column-name"><?php esc_html_e( 'Application Name', 'wp-oidcserver' ); ?></th>
-					<th scope="col" class="column-client-id"><?php esc_html_e( 'Client ID', 'wp-oidcserver' ); ?></th>
-					<th scope="col" class="column-scopes"><?php esc_html_e( 'Scopes', 'wp-oidcserver' ); ?></th>
-					<th scope="col" class="column-created"><?php esc_html_e( 'Created', 'wp-oidcserver' ); ?></th>
-					<th scope="col" class="column-actions"><?php esc_html_e( 'Actions', 'wp-oidcserver' ); ?></th>
+					<th scope="col" class="column-name"><?php esc_html_e( 'Application Name', 'wp-oidcprovider' ); ?></th>
+					<th scope="col" class="column-client-id"><?php esc_html_e( 'Client ID', 'wp-oidcprovider' ); ?></th>
+					<th scope="col" class="column-scopes"><?php esc_html_e( 'Scopes', 'wp-oidcprovider' ); ?></th>
+					<th scope="col" class="column-created"><?php esc_html_e( 'Created', 'wp-oidcprovider' ); ?></th>
+					<th scope="col" class="column-actions"><?php esc_html_e( 'Actions', 'wp-oidcprovider' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -83,7 +83,7 @@ $deleted = isset( $_GET['deleted'] ) && '1' === $_GET['deleted'];
 						</td>
 						<td class="column-actions">
 							<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-oidc-clients&client_id=' . urlencode( $row->client_id ) ) ); ?>" class="button button-small">
-								<?php esc_html_e( 'Edit', 'wp-oidcserver' ); ?>
+								<?php esc_html_e( 'Edit', 'wp-oidcprovider' ); ?>
 							</a>
 						</td>
 					</tr>

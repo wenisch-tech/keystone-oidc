@@ -1,6 +1,6 @@
 <?php
 /**
- * OIDC Server – Main Class
+ * OIDC Provider - Main Class
  *
  * Registers rewrite rules, handles activation/deactivation,
  * and dispatches OIDC endpoint requests.
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class WP_OIDC_Server {
+class WP_OIDC_Provider {
 
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_rewrite_rules' ) );
@@ -206,9 +206,9 @@ class WP_OIDC_Server {
 		$user        = wp_get_current_user();
 		$plugin_url  = WP_OIDC_PLUGIN_URL;
 		$scope_labels = array(
-			'openid'  => __( 'Verify your identity', 'wp-oidcserver' ),
-			'profile' => __( 'Access your name and username', 'wp-oidcserver' ),
-			'email'   => __( 'Access your email address', 'wp-oidcserver' ),
+			'openid'  => __( 'Verify your identity', 'wp-oidcprovider' ),
+			'profile' => __( 'Access your name and username', 'wp-oidcprovider' ),
+			'email'   => __( 'Access your email address', 'wp-oidcprovider' ),
 		);
 		$requested_scopes = explode( ' ', $scope );
 		include WP_OIDC_PLUGIN_DIR . 'includes/views/consent.php';

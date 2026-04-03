@@ -35,48 +35,48 @@ if ( $is_edit ) {
 }
 
 $all_scopes = array(
-	'openid'  => __( 'openid – Required for OIDC', 'wp-oidcserver' ),
-	'profile' => __( 'profile – Name, username', 'wp-oidcserver' ),
-	'email'   => __( 'email – Email address', 'wp-oidcserver' ),
+	'openid'  => __( 'openid – Required for OIDC', 'wp-oidcprovider' ),
+	'profile' => __( 'profile – Name, username', 'wp-oidcprovider' ),
+	'email'   => __( 'email – Email address', 'wp-oidcprovider' ),
 );
 
 $active_scopes = $is_edit ? explode( ' ', $client->allowed_scopes ) : array( 'openid', 'profile', 'email' );
 
 $title = $is_edit
-	? sprintf( __( 'Edit Client: %s', 'wp-oidcserver' ), esc_html( $client->client_name ) )
-	: __( 'Add New Client', 'wp-oidcserver' );
+	? sprintf( __( 'Edit Client: %s', 'wp-oidcprovider' ), esc_html( $client->client_name ) )
+	: __( 'Add New Client', 'wp-oidcprovider' );
 ?>
 <div class="wrap wp-oidc-wrap">
 	<h1 class="wp-heading-inline"><?php echo esc_html( $title ); ?></h1>
 	<?php if ( ! $is_edit ) : ?>
 		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-oidc-clients' ) ); ?>" class="page-title-action">
-			&larr; <?php esc_html_e( 'Back to Clients', 'wp-oidcserver' ); ?>
+			&larr; <?php esc_html_e( 'Back to Clients', 'wp-oidcprovider' ); ?>
 		</a>
 	<?php endif; ?>
 	<hr class="wp-header-end">
 
 	<?php if ( $error === 'missing_fields' ) : ?>
-		<div class="notice notice-error"><p><?php esc_html_e( 'Please fill in all required fields.', 'wp-oidcserver' ); ?></p></div>
+		<div class="notice notice-error"><p><?php esc_html_e( 'Please fill in all required fields.', 'wp-oidcprovider' ); ?></p></div>
 	<?php elseif ( $error === 'db_error' ) : ?>
-		<div class="notice notice-error"><p><?php esc_html_e( 'A database error occurred. Please try again.', 'wp-oidcserver' ); ?></p></div>
+		<div class="notice notice-error"><p><?php esc_html_e( 'A database error occurred. Please try again.', 'wp-oidcprovider' ); ?></p></div>
 	<?php elseif ( $error === 'reset_failed' ) : ?>
-		<div class="notice notice-error"><p><?php esc_html_e( 'Failed to reset client secret.', 'wp-oidcserver' ); ?></p></div>
+		<div class="notice notice-error"><p><?php esc_html_e( 'Failed to reset client secret.', 'wp-oidcprovider' ); ?></p></div>
 	<?php endif; ?>
 
 	<?php if ( $updated ) : ?>
-		<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Client updated successfully.', 'wp-oidcserver' ); ?></p></div>
+		<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Client updated successfully.', 'wp-oidcprovider' ); ?></p></div>
 	<?php endif; ?>
 
 	<?php if ( $new_secret ) : ?>
 		<div class="notice notice-warning wp-oidc-secret-notice">
 			<p>
-				<strong><?php echo $created ? esc_html__( 'Client created!', 'wp-oidcserver' ) : esc_html__( 'Secret reset!', 'wp-oidcserver' ); ?></strong>
-				<?php esc_html_e( 'Copy your client secret now – it will not be shown again.', 'wp-oidcserver' ); ?>
+				<strong><?php echo $created ? esc_html__( 'Client created!', 'wp-oidcprovider' ) : esc_html__( 'Secret reset!', 'wp-oidcprovider' ); ?></strong>
+				<?php esc_html_e( 'Copy your client secret now – it will not be shown again.', 'wp-oidcprovider' ); ?>
 			</p>
 			<div class="wp-oidc-secret-box">
 				<code id="client-secret-value"><?php echo esc_html( $new_secret ); ?></code>
 				<button type="button" class="button button-small wp-oidc-copy-btn" data-target="client-secret-value">
-					<?php esc_html_e( 'Copy', 'wp-oidcserver' ); ?>
+					<?php esc_html_e( 'Copy', 'wp-oidcprovider' ); ?>
 				</button>
 			</div>
 		</div>
@@ -85,43 +85,43 @@ $title = $is_edit
 	<?php if ( $is_edit ) : ?>
 		<!-- Client credentials display -->
 		<div class="wp-oidc-credentials-card">
-			<h2><?php esc_html_e( 'Client Credentials', 'wp-oidcserver' ); ?></h2>
+			<h2><?php esc_html_e( 'Client Credentials', 'wp-oidcprovider' ); ?></h2>
 			<table class="wp-oidc-credentials-table">
 				<tr>
-					<th><?php esc_html_e( 'Client ID', 'wp-oidcserver' ); ?></th>
+					<th><?php esc_html_e( 'Client ID', 'wp-oidcprovider' ); ?></th>
 					<td>
 						<code id="client-id-value"><?php echo esc_html( $client->client_id ); ?></code>
 						<button type="button" class="button button-small wp-oidc-copy-btn" data-target="client-id-value">
-							<?php esc_html_e( 'Copy', 'wp-oidcserver' ); ?>
+							<?php esc_html_e( 'Copy', 'wp-oidcprovider' ); ?>
 						</button>
 					</td>
 				</tr>
 				<tr>
-					<th><?php esc_html_e( 'Client Secret', 'wp-oidcserver' ); ?></th>
+					<th><?php esc_html_e( 'Client Secret', 'wp-oidcprovider' ); ?></th>
 					<td>
-						<span class="wp-oidc-secret-masked"><?php esc_html_e( '(hidden – reset to reveal)', 'wp-oidcserver' ); ?></span>
+						<span class="wp-oidc-secret-masked"><?php esc_html_e( '(hidden – reset to reveal)', 'wp-oidcprovider' ); ?></span>
 						<form method="POST" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="wp-oidc-inline-form"
-							onsubmit="return confirm('<?php echo esc_js( __( 'Are you sure? This will invalidate the current secret.', 'wp-oidcserver' ) ); ?>')">
+							onsubmit="return confirm('<?php echo esc_js( __( 'Are you sure? This will invalidate the current secret.', 'wp-oidcprovider' ) ); ?>')">
 							<?php wp_nonce_field( 'wp_oidc_reset_secret' ); ?>
 							<input type="hidden" name="action" value="wp_oidc_reset_secret">
 							<input type="hidden" name="client_id" value="<?php echo esc_attr( $client->client_id ); ?>">
 							<button type="submit" class="button button-small button-link-delete">
-								<?php esc_html_e( 'Reset Secret', 'wp-oidcserver' ); ?>
+								<?php esc_html_e( 'Reset Secret', 'wp-oidcprovider' ); ?>
 							</button>
 						</form>
 					</td>
 				</tr>
 				<tr>
-					<th><?php esc_html_e( 'Discovery URL', 'wp-oidcserver' ); ?></th>
+					<th><?php esc_html_e( 'Discovery URL', 'wp-oidcprovider' ); ?></th>
 					<td>
 						<code id="discovery-url"><?php echo esc_html( trailingslashit( get_bloginfo( 'url' ) ) . '.well-known/openid-configuration' ); ?></code>
 						<button type="button" class="button button-small wp-oidc-copy-btn" data-target="discovery-url">
-							<?php esc_html_e( 'Copy', 'wp-oidcserver' ); ?>
+							<?php esc_html_e( 'Copy', 'wp-oidcprovider' ); ?>
 						</button>
 					</td>
 				</tr>
 				<tr>
-					<th><?php esc_html_e( 'Created', 'wp-oidcserver' ); ?></th>
+					<th><?php esc_html_e( 'Created', 'wp-oidcprovider' ); ?></th>
 					<td><?php echo esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $client->created_at ) ) ); ?></td>
 				</tr>
 			</table>
@@ -131,9 +131,9 @@ $title = $is_edit
 	<!-- Edit / Create form -->
 	<div class="wp-oidc-form-card">
 		<?php if ( $is_edit ) : ?>
-			<h2><?php esc_html_e( 'Configuration', 'wp-oidcserver' ); ?></h2>
+			<h2><?php esc_html_e( 'Configuration', 'wp-oidcprovider' ); ?></h2>
 		<?php else : ?>
-			<h2><?php esc_html_e( 'Client Details', 'wp-oidcserver' ); ?></h2>
+			<h2><?php esc_html_e( 'Client Details', 'wp-oidcprovider' ); ?></h2>
 		<?php endif; ?>
 		<form method="POST" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<?php wp_nonce_field( 'wp_oidc_save_client' ); ?>
@@ -145,27 +145,27 @@ $title = $is_edit
 			<table class="form-table" role="presentation">
 				<tr>
 					<th scope="row">
-						<label for="client_name"><?php esc_html_e( 'Application Name', 'wp-oidcserver' ); ?> <span class="required">*</span></label>
+						<label for="client_name"><?php esc_html_e( 'Application Name', 'wp-oidcprovider' ); ?> <span class="required">*</span></label>
 					</th>
 					<td>
 						<input type="text" id="client_name" name="client_name" class="regular-text"
 							value="<?php echo $is_edit ? esc_attr( $client->client_name ) : ''; ?>"
-							placeholder="<?php esc_attr_e( 'My Application', 'wp-oidcserver' ); ?>" required>
-						<p class="description"><?php esc_html_e( 'A friendly name for this client application.', 'wp-oidcserver' ); ?></p>
+							placeholder="<?php esc_attr_e( 'My Application', 'wp-oidcprovider' ); ?>" required>
+						<p class="description"><?php esc_html_e( 'A friendly name for this client application.', 'wp-oidcprovider' ); ?></p>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row">
-						<label for="redirect_uris"><?php esc_html_e( 'Redirect URIs', 'wp-oidcserver' ); ?> <span class="required">*</span></label>
+						<label for="redirect_uris"><?php esc_html_e( 'Redirect URIs', 'wp-oidcprovider' ); ?> <span class="required">*</span></label>
 					</th>
 					<td>
 						<textarea id="redirect_uris" name="redirect_uris" rows="4" class="large-text code"
 							placeholder="https://example.com/callback" required><?php echo esc_textarea( $redirect_uris_text ); ?></textarea>
-						<p class="description"><?php esc_html_e( 'One URI per line. These are the allowed callback URLs after authorization.', 'wp-oidcserver' ); ?></p>
+						<p class="description"><?php esc_html_e( 'One URI per line. These are the allowed callback URLs after authorization.', 'wp-oidcprovider' ); ?></p>
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><?php esc_html_e( 'Allowed Scopes', 'wp-oidcserver' ); ?></th>
+					<th scope="row"><?php esc_html_e( 'Allowed Scopes', 'wp-oidcprovider' ); ?></th>
 					<td>
 						<?php foreach ( $all_scopes as $scope_key => $scope_label ) : ?>
 							<label class="wp-oidc-scope-label">
@@ -176,7 +176,7 @@ $title = $is_edit
 							</label><br>
 						<?php endforeach; ?>
 						<input type="hidden" name="allowed_scopes" id="allowed_scopes_hidden" value="<?php echo esc_attr( implode( ' ', $active_scopes ) ); ?>">
-						<p class="description"><?php esc_html_e( 'The "openid" scope is always required.', 'wp-oidcserver' ); ?></p>
+						<p class="description"><?php esc_html_e( 'The "openid" scope is always required.', 'wp-oidcprovider' ); ?></p>
 					</td>
 				</tr>
 			</table>
@@ -184,14 +184,14 @@ $title = $is_edit
 			<p class="submit">
 				<button type="submit" class="button button-primary">
 					<?php if ( $is_edit ) : ?>
-						<?php esc_html_e( 'Save Changes', 'wp-oidcserver' ); ?>
+						<?php esc_html_e( 'Save Changes', 'wp-oidcprovider' ); ?>
 					<?php else : ?>
-						<?php esc_html_e( 'Create Client', 'wp-oidcserver' ); ?>
+						<?php esc_html_e( 'Create Client', 'wp-oidcprovider' ); ?>
 					<?php endif; ?>
 				</button>
 				<?php if ( $is_edit ) : ?>
 					<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-oidc-clients' ) ); ?>" class="button">
-						<?php esc_html_e( 'Cancel', 'wp-oidcserver' ); ?>
+						<?php esc_html_e( 'Cancel', 'wp-oidcprovider' ); ?>
 					</a>
 				<?php endif; ?>
 			</p>
@@ -200,15 +200,15 @@ $title = $is_edit
 
 	<?php if ( $is_edit ) : ?>
 		<div class="wp-oidc-danger-zone">
-			<h2><?php esc_html_e( 'Danger Zone', 'wp-oidcserver' ); ?></h2>
-			<p><?php esc_html_e( 'Deleting a client is permanent and will revoke all associated tokens.', 'wp-oidcserver' ); ?></p>
+			<h2><?php esc_html_e( 'Danger Zone', 'wp-oidcprovider' ); ?></h2>
+			<p><?php esc_html_e( 'Deleting a client is permanent and will revoke all associated tokens.', 'wp-oidcprovider' ); ?></p>
 			<form method="POST" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
-				onsubmit="return confirm('<?php echo esc_js( __( 'Delete this client and all its tokens? This cannot be undone.', 'wp-oidcserver' ) ); ?>')">
+				onsubmit="return confirm('<?php echo esc_js( __( 'Delete this client and all its tokens? This cannot be undone.', 'wp-oidcprovider' ) ); ?>')">
 				<?php wp_nonce_field( 'wp_oidc_delete_client' ); ?>
 				<input type="hidden" name="action" value="wp_oidc_delete_client">
 				<input type="hidden" name="client_id" value="<?php echo esc_attr( $client->client_id ); ?>">
 				<button type="submit" class="button button-link-delete">
-					<?php esc_html_e( 'Delete Client', 'wp-oidcserver' ); ?>
+					<?php esc_html_e( 'Delete Client', 'wp-oidcprovider' ); ?>
 				</button>
 			</form>
 		</div>
@@ -238,7 +238,7 @@ $title = $is_edit
 			if (!target) return;
 			navigator.clipboard.writeText(target.textContent).then(function() {
 				var orig = btn.textContent;
-				btn.textContent = '<?php echo esc_js( __( 'Copied!', 'wp-oidcserver' ) ); ?>';
+				btn.textContent = '<?php echo esc_js( __( 'Copied!', 'wp-oidcprovider' ) ); ?>';
 				setTimeout(function() { btn.textContent = orig; }, 2000);
 			});
 		});

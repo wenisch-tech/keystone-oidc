@@ -155,7 +155,7 @@ class WP_OIDC_Client_Manager {
 		);
 
 		if ( false === $result ) {
-			return new WP_Error( 'db_error', __( 'Failed to create client.', 'wp-oidcserver' ) );
+			return new WP_Error( 'db_error', __( 'Failed to create client.', 'wp-oidcprovider' ) );
 		}
 
 		return array(
@@ -189,7 +189,7 @@ class WP_OIDC_Client_Manager {
 		);
 
 		if ( false === $result ) {
-			return new WP_Error( 'db_error', __( 'Failed to update client.', 'wp-oidcserver' ) );
+			return new WP_Error( 'db_error', __( 'Failed to update client.', 'wp-oidcprovider' ) );
 		}
 
 		return true;
@@ -216,7 +216,7 @@ class WP_OIDC_Client_Manager {
 		);
 
 		if ( false === $result ) {
-			return new WP_Error( 'db_error', __( 'Failed to reset client secret.', 'wp-oidcserver' ) );
+			return new WP_Error( 'db_error', __( 'Failed to reset client secret.', 'wp-oidcprovider' ) );
 		}
 
 		return $plain_secret;

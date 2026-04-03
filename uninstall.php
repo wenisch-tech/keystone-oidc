@@ -1,6 +1,6 @@
 <?php
 /**
- * Uninstall WP OIDC Server
+ * Uninstall WP OIDC Provider
  *
  * This file runs when the plugin is uninstalled (deleted) from WordPress.
  * It removes all plugin data: database tables and options.

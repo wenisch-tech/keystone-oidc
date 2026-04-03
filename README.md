@@ -1,10 +1,10 @@
-# WP OIDC Server
+# WP OIDC Provider
 
 > Turn your WordPress site into a fully featured **OpenID Connect (OIDC) identity provider**.
 
-[![Release](https://github.com/JFWenisch/wp-oidcserver/actions/workflows/release.yml/badge.svg)](https://github.com/JFWenisch/wp-oidcserver/actions/workflows/release.yml)
+[![Release](https://github.com/JFWenisch/wp-oidcserver/actions/workflows/ci.yml/badge.svg)](https://github.com/JFWenisch/wp-oidcserver/actions/workflows/ci.yml)
 
-WP OIDC Server is a WordPress plugin that exposes standard OIDC / OAuth 2.0 endpoints so that other applications — dashboards, CLIs, mobile apps, or any OIDC-aware tool — can authenticate users against your existing WordPress user database.  
+WP OIDC Provider is a WordPress plugin that exposes standard OIDC / OAuth 2.0 endpoints so that other applications — dashboards, CLIs, mobile apps, or any OIDC-aware tool — can authenticate users against your existing WordPress user database.  
 No external identity provider or third-party service is required.
 
 ---
@@ -69,7 +69,7 @@ Pretty permalinks must be **enabled** in WordPress (`Settings → Permalinks`). 
 
 ### Option A – Upload the ZIP (recommended)
 
-1. Download the latest `wp-oidcserver-x.y.z.zip` from the [Releases page](https://github.com/JFWenisch/wp-oidcserver/releases).
+1. Download the latest `wp-oidcprovider-x.y.z.zip` from the [Releases page](https://github.com/JFWenisch/wp-oidcserver/releases).
 2. In your WordPress admin go to **Plugins → Add New → Upload Plugin**.
 3. Choose the downloaded ZIP and click **Install Now**.
 4. Click **Activate Plugin**.
@@ -77,7 +77,7 @@ Pretty permalinks must be **enabled** in WordPress (`Settings → Permalinks`). 
 ### Option B – Manual file copy
 
 1. Download and unzip the release archive.
-2. Copy the `wp-oidcserver` folder to `wp-content/plugins/`.
+2. Copy the `wp-oidcprovider` folder to `wp-content/plugins/`.
 3. Activate the plugin in **Plugins → Installed Plugins**.
 
 ### What happens on activation
@@ -94,7 +94,7 @@ After activating the plugin you only need to do two things:
 
 **1. Create a client**
 
-Go to **OIDC Server → Add Client** in the WordPress admin sidebar.
+Go to **OIDC Provider → Add Client** in the WordPress admin sidebar.
 
 Fill in:
 - **Application Name** – a friendly label (e.g. "My Dashboard")
@@ -123,7 +123,7 @@ That's it – your users can now sign in to external applications using their Wo
 
 ### Client list
 
-**OIDC Server → Clients**
+**OIDC Provider → Clients**
 
 Displays all registered clients in a table with their name, client ID, allowed scopes, and creation date. The discovery URL is shown at the top of the page for convenience.
 
@@ -131,8 +131,8 @@ From the list you can click **Edit** to open a client's detail page.
 
 ### Add / Edit a client
 
-**Add a client:** OIDC Server → Add Client  
-**Edit a client:** click **Edit** on the client list, or navigate to OIDC Server → Clients and click a client name.
+**Add a client:** OIDC Provider → Add Client  
+**Edit a client:** click **Edit** on the client list, or navigate to OIDC Provider → Clients and click a client name.
 
 The edit screen has three sections:
 
@@ -151,7 +151,7 @@ The edit screen has three sections:
 
 ### Settings page
 
-**OIDC Server → Settings**
+**OIDC Provider → Settings**
 
 Displays read-only information about the server:
 
@@ -169,7 +169,7 @@ Displays read-only information about the server:
 ### Authorization Code Flow
 
 ```
- Client App                WordPress (OIDC Server)             User
+ Client App                WordPress (OIDC Provider)           User
      │                             │                             │
      │── GET /oauth/authorize ──── │                             │
      │   ?response_type=code       │                             │
@@ -361,19 +361,14 @@ The `sub` claim is always the WordPress user's numeric ID (as a string), ensurin
 
 ## Releases & CI pipeline
 
-Every push of a **semver tag** (`v1.2.3`) triggers the [release workflow](.github/workflows/release.yml) which:
+Every push to `main` automatically bumps the version (patch by default, following [Conventional Commits](https://www.conventionalcommits.org/)) via the [CI workflow](.github/workflows/ci.yml) which:
 
-1. Extracts the version number from the tag.
-2. Patches the `Version:` header in `wp-oidcserver.php` and `Stable tag:` in `readme.txt`.
-3. Creates a `wp-oidcserver-x.y.z.zip` archive with `wp-oidcserver/` as the root folder (the layout WordPress expects).
+1. Computes the next semver tag and generates a changelog.
+2. Patches the `Version:` header in `wp-oidcprovider.php` and `Stable tag:` in `readme.txt`.
+3. Creates a `wp-oidcprovider-x.y.z.zip` archive with `wp-oidcprovider/` as the root folder (the layout WordPress expects).
 4. Publishes a GitHub Release with the ZIP attached as a downloadable asset.
 
-To create a release:
-
-```bash
-git tag v1.2.3
-git push origin v1.2.3
-```
+No manual tagging is required — just push to `main` and the pipeline handles everything.
 
 The resulting ZIP can be uploaded directly via **Plugins → Add New → Upload Plugin** in WordPress.
 

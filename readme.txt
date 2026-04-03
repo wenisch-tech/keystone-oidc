@@ -1,4 +1,4 @@
-=== WP OIDC Server ===
+=== WP OIDC Provider ===
 Contributors: jfwenisch
 Tags: oidc, openid-connect, sso, authentication, oauth2
 Requires at least: 5.6
@@ -12,7 +12,7 @@ Turn your WordPress site into an OpenID Connect (OIDC) identity provider. Manage
 
 == Description ==
 
-WP OIDC Server transforms your WordPress installation into a fully-featured **OpenID Connect (OIDC) identity provider**, allowing other applications to authenticate users via your WordPress user database.
+WP OIDC Provider transforms your WordPress installation into a fully-featured **OpenID Connect (OIDC) identity provider**, allowing other applications to authenticate users via your WordPress user database.
 
 = Key Features =
 
@@ -38,18 +38,18 @@ WP OIDC Server transforms your WordPress installation into a fully-featured **Op
 = Quick Start =
 
 1. Install and activate the plugin
-2. Go to **OIDC Server → Add Client** in your WordPress admin
+2. Go to **OIDC Provider → Add Client** in your WordPress admin
 3. Enter your application name and redirect URI(s)
 4. Copy the generated **Client ID** and **Client Secret** (shown once)
 5. Configure your OIDC client application with the discovery URL shown in the settings
 
 == Installation ==
 
-1. Upload the `wp-oidcserver` folder to `/wp-content/plugins/`
+1. Upload the `wp-oidcprovider` folder to `/wp-content/plugins/`
 2. Activate the plugin through the **Plugins** menu
-3. Navigate to **OIDC Server** in the admin sidebar to create your first client
+3. Navigate to **OIDC Provider** in the admin sidebar to create your first client
 
-Alternatively, download the `wp-oidcserver.zip` from the [GitHub Releases](https://github.com/JFWenisch/wp-oidcserver/releases) page and upload it via **Plugins → Add New → Upload Plugin**.
+Alternatively, download the `wp-oidcprovider.zip` from the [GitHub Releases](https://github.com/JFWenisch/wp-oidcserver/releases) page and upload it via **Plugins → Add New → Upload Plugin**.
 
 == Frequently Asked Questions ==
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * OIDC Server Admin
+ * OIDC Provider Admin
  *
  * Registers the admin menu and handles client management UI.
  */
@@ -26,8 +26,8 @@ class WP_OIDC_Admin {
 
 	public function register_menu() {
 		add_menu_page(
-			__( 'OIDC Server', 'wp-oidcserver' ),
-			__( 'OIDC Server', 'wp-oidcserver' ),
+			__( 'OIDC Provider', 'wp-oidcprovider' ),
+			__( 'OIDC Provider', 'wp-oidcprovider' ),
 			'manage_options',
 			'wp-oidc-clients',
 			array( $this, 'page_clients' ),
@@ -37,8 +37,8 @@ class WP_OIDC_Admin {
 
 		add_submenu_page(
 			'wp-oidc-clients',
-			__( 'Clients', 'wp-oidcserver' ),
-			__( 'Clients', 'wp-oidcserver' ),
+			__( 'Clients', 'wp-oidcprovider' ),
+			__( 'Clients', 'wp-oidcprovider' ),
 			'manage_options',
 			'wp-oidc-clients',
 			array( $this, 'page_clients' )
@@ -46,8 +46,8 @@ class WP_OIDC_Admin {
 
 		add_submenu_page(
 			'wp-oidc-clients',
-			__( 'Add Client', 'wp-oidcserver' ),
-			__( 'Add Client', 'wp-oidcserver' ),
+			__( 'Add Client', 'wp-oidcprovider' ),
+			__( 'Add Client', 'wp-oidcprovider' ),
 			'manage_options',
 			'wp-oidc-add-client',
 			array( $this, 'page_add_client' )
@@ -55,8 +55,8 @@ class WP_OIDC_Admin {
 
 		add_submenu_page(
 			'wp-oidc-clients',
-			__( 'Settings', 'wp-oidcserver' ),
-			__( 'Settings', 'wp-oidcserver' ),
+			__( 'Settings', 'wp-oidcprovider' ),
+			__( 'Settings', 'wp-oidcprovider' ),
 			'manage_options',
 			'wp-oidc-settings',
 			array( $this, 'page_settings' )
@@ -87,7 +87,7 @@ class WP_OIDC_Admin {
 
 	public function page_clients() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to access this page.', 'wp-oidcserver' ) );
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'wp-oidcprovider' ) );
 		}
 
 		// Handle edit sub-page.
@@ -107,7 +107,7 @@ class WP_OIDC_Admin {
 
 	public function page_add_client() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to access this page.', 'wp-oidcserver' ) );
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'wp-oidcprovider' ) );
 		}
 		$client = null;
 		include WP_OIDC_PLUGIN_DIR . 'admin/views/page-client-edit.php';
@@ -115,7 +115,7 @@ class WP_OIDC_Admin {
 
 	public function page_settings() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to access this page.', 'wp-oidcserver' ) );
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'wp-oidcprovider' ) );
 		}
 		include WP_OIDC_PLUGIN_DIR . 'admin/views/page-settings.php';
 	}
@@ -128,7 +128,7 @@ class WP_OIDC_Admin {
 		check_admin_referer( 'wp_oidc_save_client' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Permission denied.', 'wp-oidcserver' ) );
+			wp_die( esc_html__( 'Permission denied.', 'wp-oidcprovider' ) );
 		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
@@ -191,7 +191,7 @@ class WP_OIDC_Admin {
 		check_admin_referer( 'wp_oidc_delete_client' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Permission denied.', 'wp-oidcserver' ) );
+			wp_die( esc_html__( 'Permission denied.', 'wp-oidcprovider' ) );
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
@@ -206,7 +206,7 @@ class WP_OIDC_Admin {
 		check_admin_referer( 'wp_oidc_reset_secret' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Permission denied.', 'wp-oidcserver' ) );
+			wp_die( esc_html__( 'Permission denied.', 'wp-oidcprovider' ) );
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
@@ -229,7 +229,7 @@ class WP_OIDC_Admin {
 		check_admin_referer( 'wp_oidc_rotate_keys' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Permission denied.', 'wp-oidcserver' ) );
+			wp_die( esc_html__( 'Permission denied.', 'wp-oidcprovider' ) );
 		}
 
 		$result = WP_OIDC_Token_Manager::generate_keys();
