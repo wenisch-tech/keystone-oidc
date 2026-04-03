@@ -130,7 +130,11 @@ $title = $is_edit
 
 	<!-- Edit / Create form -->
 	<div class="wp-oidc-form-card">
-		<h2><?php $is_edit ? esc_html_e( 'Configuration', 'wp-oidcserver' ) : esc_html_e( 'Client Details', 'wp-oidcserver' ); ?></h2>
+		<?php if ( $is_edit ) : ?>
+			<h2><?php esc_html_e( 'Configuration', 'wp-oidcserver' ); ?></h2>
+		<?php else : ?>
+			<h2><?php esc_html_e( 'Client Details', 'wp-oidcserver' ); ?></h2>
+		<?php endif; ?>
 		<form method="POST" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<?php wp_nonce_field( 'wp_oidc_save_client' ); ?>
 			<input type="hidden" name="action" value="wp_oidc_save_client">
@@ -179,7 +183,11 @@ $title = $is_edit
 
 			<p class="submit">
 				<button type="submit" class="button button-primary">
-					<?php $is_edit ? esc_html_e( 'Save Changes', 'wp-oidcserver' ) : esc_html_e( 'Create Client', 'wp-oidcserver' ); ?>
+					<?php if ( $is_edit ) : ?>
+						<?php esc_html_e( 'Save Changes', 'wp-oidcserver' ); ?>
+					<?php else : ?>
+						<?php esc_html_e( 'Create Client', 'wp-oidcserver' ); ?>
+					<?php endif; ?>
 				</button>
 				<?php if ( $is_edit ) : ?>
 					<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-oidc-clients' ) ); ?>" class="button">

@@ -29,7 +29,7 @@ jobs:
       - name: Update plugin version in PHP header
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          sed -i "s/^ \* Version:.*/ * Version:           ${VERSION}/" wp-oidcserver.php
+          sed -i "s/^ \* Version:.*/ * Version: ${VERSION}/" wp-oidcserver.php
           sed -i "s/define( 'WP_OIDC_VERSION', '[^']*' )/define( 'WP_OIDC_VERSION', '${VERSION}' )/" wp-oidcserver.php
 
       - name: Update stable tag in readme.txt

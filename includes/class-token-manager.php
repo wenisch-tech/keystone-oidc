@@ -95,7 +95,9 @@ class WP_OIDC_Token_Manager {
 	 * @return string
 	 */
 	public static function base64url_decode( $data ) {
-		$padded = str_pad( strtr( $data, '-_', '+/' ), strlen( $data ) % 4 === 0 ? strlen( $data ) : strlen( $data ) + 4 - strlen( $data ) % 4, '=', STR_PAD_RIGHT );
+		$remainder  = strlen( $data ) % 4;
+		$pad_length = $remainder === 0 ? strlen( $data ) : strlen( $data ) + 4 - $remainder;
+		$padded     = str_pad( strtr( $data, '-_', '+/' ), $pad_length, '=', STR_PAD_RIGHT );
 		return base64_decode( $padded );
 	}
 
