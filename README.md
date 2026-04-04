@@ -1,8 +1,13 @@
 # WP OIDC Provider
 
+[![Release](https://github.com/wenisch-tech/wp-oidcprovider/actions/workflows/ci.yml/badge.svg)](https://github.com/wenisch-tech/wp-oidcprovider/actions/workflows/ci.yml)
+[![Latest Release](https://img.shields.io/github/v/release/wenisch-tech/wp-oidcprovider?label=release)](https://github.com/wenisch-tech/wp-oidcprovider/releases/latest)
+
+![WP OIDC Provider](assets/banner-1544x500.png)
+
 > Turn your WordPress site into a fully featured **OpenID Connect (OIDC) identity provider**.
 
-[![Release](https://github.com/wenisch-tech/wp-oidcprovider/actions/workflows/ci.yml/badge.svg)](https://github.com/wenisch-tech/wp-oidcprovider/actions/workflows/ci.yml)
+
 
 WP OIDC Provider is a WordPress plugin that exposes standard OIDC / OAuth 2.0 endpoints so that other applications — dashboards, CLIs, mobile apps, or any OIDC-aware tool — can authenticate users against your existing WordPress user database.  
 No external identity provider or third-party service is required.
