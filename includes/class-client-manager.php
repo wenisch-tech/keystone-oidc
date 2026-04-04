@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * OIDC Client Manager
  *
@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class WP_OIDC_Client_Manager {
+class KEYSTONE_OIDC_Client_Manager {
 
 	const TABLE_CLIENTS    = 'oidc_clients';
 	const TABLE_AUTH_CODES = 'oidc_auth_codes';
@@ -155,7 +155,7 @@ class WP_OIDC_Client_Manager {
 		);
 
 		if ( false === $result ) {
-			return new WP_Error( 'db_error', __( 'Failed to create client.', 'wp-oidcprovider' ) );
+			return new WP_Error( 'db_error', __( 'Failed to create client.', 'keystone-oidc' ) );
 		}
 
 		return array(
@@ -189,7 +189,7 @@ class WP_OIDC_Client_Manager {
 		);
 
 		if ( false === $result ) {
-			return new WP_Error( 'db_error', __( 'Failed to update client.', 'wp-oidcprovider' ) );
+			return new WP_Error( 'db_error', __( 'Failed to update client.', 'keystone-oidc' ) );
 		}
 
 		return true;
@@ -216,7 +216,7 @@ class WP_OIDC_Client_Manager {
 		);
 
 		if ( false === $result ) {
-			return new WP_Error( 'db_error', __( 'Failed to reset client secret.', 'wp-oidcprovider' ) );
+			return new WP_Error( 'db_error', __( 'Failed to reset client secret.', 'keystone-oidc' ) );
 		}
 
 		return $plain_secret;

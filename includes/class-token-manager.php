@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * OIDC Token Manager
  *
@@ -9,11 +9,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class WP_OIDC_Token_Manager {
+class KEYSTONE_OIDC_Token_Manager {
 
-	const OPTION_PRIVATE_KEY = 'wp_oidc_private_key';
-	const OPTION_PUBLIC_KEY  = 'wp_oidc_public_key';
-	const OPTION_KEY_ID      = 'wp_oidc_key_id';
+	const OPTION_PRIVATE_KEY = 'keystone_oidc_private_key';
+	const OPTION_PUBLIC_KEY  = 'keystone_oidc_public_key';
+	const OPTION_KEY_ID      = 'keystone_oidc_key_id';
 
 	const AUTH_CODE_LIFETIME    = 600;       // 10 minutes.
 	const ACCESS_TOKEN_LIFETIME = 3600;      // 1 hour.
@@ -224,7 +224,7 @@ class WP_OIDC_Token_Manager {
 		$expires_at = gmdate( 'Y-m-d H:i:s', time() + self::AUTH_CODE_LIFETIME );
 
 		$wpdb->insert(
-			$wpdb->prefix . WP_OIDC_Client_Manager::TABLE_AUTH_CODES,
+			$wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_AUTH_CODES,
 			array(
 				'code'                  => $code,
 				'client_id'             => $client_id,
@@ -254,7 +254,7 @@ class WP_OIDC_Token_Manager {
 	public static function consume_auth_code( $code, $client_id, $redirect_uri, $code_verifier = null ) {
 		global $wpdb;
 
-		$table = $wpdb->prefix . WP_OIDC_Client_Manager::TABLE_AUTH_CODES;
+		$table = $wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_AUTH_CODES;
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE code = %s", $code ) );
 
@@ -378,7 +378,7 @@ class WP_OIDC_Token_Manager {
 	private static function store_token_record( $hash, $client_id, $user_id, $scope, $token_type, $expires ) {
 		global $wpdb;
 		$wpdb->insert(
-			$wpdb->prefix . WP_OIDC_Client_Manager::TABLE_TOKENS,
+			$wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_TOKENS,
 			array(
 				'token_hash' => $hash,
 				'client_id'  => $client_id,
@@ -407,7 +407,7 @@ class WP_OIDC_Token_Manager {
 
 		// Check revocation.
 		$hash  = hash( 'sha256', $access_token );
-		$table = $wpdb->prefix . WP_OIDC_Client_Manager::TABLE_TOKENS;
+		$table = $wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_TOKENS;
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$record = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE token_hash = %s AND token_type = 'access'", $hash ) );
 
@@ -432,7 +432,7 @@ class WP_OIDC_Token_Manager {
 		global $wpdb;
 
 		$hash  = hash( 'sha256', $refresh_token );
-		$table = $wpdb->prefix . WP_OIDC_Client_Manager::TABLE_TOKENS;
+		$table = $wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_TOKENS;
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$record = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE token_hash = %s AND token_type = 'refresh'", $hash ) );
@@ -462,7 +462,7 @@ class WP_OIDC_Token_Manager {
 	 * @return string
 	 */
 	public static function get_issuer() {
-		return get_option( 'wp_oidc_issuer', get_bloginfo( 'url' ) );
+		return get_option( 'keystone_oidc_issuer', get_bloginfo( 'url' ) );
 	}
 
 	/**
@@ -472,8 +472,8 @@ class WP_OIDC_Token_Manager {
 		global $wpdb;
 		$now  = gmdate( 'Y-m-d H:i:s' );
 
-		$auth_table  = $wpdb->prefix . WP_OIDC_Client_Manager::TABLE_AUTH_CODES;
-		$token_table = $wpdb->prefix . WP_OIDC_Client_Manager::TABLE_TOKENS;
+		$auth_table  = $wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_AUTH_CODES;
+		$token_table = $wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_TOKENS;
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$auth_table} WHERE expires_at < %s", $now ) );

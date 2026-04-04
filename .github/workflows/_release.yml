@@ -1,4 +1,4 @@
-name: Release
+﻿name: Release
 
 on:
   workflow_call:
@@ -26,8 +26,8 @@ jobs:
       - name: Update plugin version in PHP header
         run: |
           VERSION="${{ inputs.version }}"
-          sed -i "s/^ \* Version:.*/ * Version: ${VERSION}/" wp-oidcprovider.php
-          sed -i "s/define( 'WP_OIDC_VERSION', '[^']*' )/define( 'WP_OIDC_VERSION', '${VERSION}' )/" wp-oidcprovider.php
+          sed -i "s/^ \* Version:.*/ * Version: ${VERSION}/" keystone-oidc.php
+          sed -i "s/define( 'KEYSTONE_OIDC_VERSION', '[^']*' )/define( 'KEYSTONE_OIDC_VERSION', '${VERSION}' )/" keystone-oidc.php
 
       - name: Update stable tag in readme.txt
         run: |
@@ -38,7 +38,7 @@ jobs:
         run: |
           VERSION="${{ inputs.version }}"
           PLUGIN_DIR="wp-oidcprovider"
-          ARCHIVE="wp-oidcprovider-${VERSION}.zip"
+          ARCHIVE="keystone-oidc-${VERSION}.zip"
 
           mkdir -p "/tmp/${PLUGIN_DIR}"
           rsync -a \
@@ -59,15 +59,15 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.tag }}
-          name: WP OIDC Provider ${{ inputs.tag }}
+          name: Keystone OIDC ${{ inputs.tag }}
           body: |
-            ## WP OIDC Provider ${{ inputs.tag }}
+            ## Keystone OIDC ${{ inputs.tag }}
 
             ${{ inputs.changelog }}
 
             ### Installation
 
-            1. Download `wp-oidcprovider-${{ inputs.version }}.zip` below
+            1. Download `keystone-oidc-${{ inputs.version }}.zip` below
             2. In your WordPress admin go to **Plugins → Add New → Upload Plugin**
             3. Upload the ZIP file and activate the plugin
             4. Navigate to **OIDC Provider** in the admin sidebar to create your first client

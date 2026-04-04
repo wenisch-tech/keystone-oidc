@@ -1,15 +1,15 @@
-# WP OIDC Provider
+﻿# Keystone OIDC
 
-[![Release](https://github.com/wenisch-tech/wp-oidcprovider/actions/workflows/ci.yml/badge.svg)](https://github.com/wenisch-tech/wp-oidcprovider/actions/workflows/ci.yml)
-[![Latest Release](https://img.shields.io/github/v/release/wenisch-tech/wp-oidcprovider?label=release)](https://github.com/wenisch-tech/wp-oidcprovider/releases/latest)
+[![Release](https://github.com/wenisch-tech/keystone-oidc/actions/workflows/ci.yml/badge.svg)](https://github.com/wenisch-tech/keystone-oidc/actions/workflows/ci.yml)
+[![Latest Release](https://img.shields.io/github/v/release/wenisch-tech/keystone-oidc?label=release)](https://github.com/wenisch-tech/keystone-oidc/releases/latest)
 
-![WP OIDC Provider](assets/banner-1544x500.png)
+![Keystone OIDC](assets/banner-1544x500.png)
 
 > Turn your WordPress site into a fully featured **OpenID Connect (OIDC) identity provider**.
 
 
 
-WP OIDC Provider is a WordPress plugin that exposes standard OIDC / OAuth 2.0 endpoints so that other applications — dashboards, CLIs, mobile apps, or any OIDC-aware tool — can authenticate users against your existing WordPress user database.  
+Keystone OIDC is a WordPress plugin that exposes standard OIDC / OAuth 2.0 endpoints so that other applications — dashboards, CLIs, mobile apps, or any OIDC-aware tool — can authenticate users against your existing WordPress user database.  
 No external identity provider or third-party service is required.
 
 ---
@@ -47,7 +47,7 @@ No external identity provider or third-party service is required.
 | ✅ | **PKCE** – S256 and plain code-challenge methods (RFC 7636) |
 | ✅ | **RS256 JWT** signed access tokens and ID tokens |
 | ✅ | **Refresh tokens** with single-use rotation |
-| ✅ | **OIDC Discovery** document (`/wenisch-tech/wp-oidcprovider/.well-known/openid-configuration`) for zero-config clients |
+| ✅ | **OIDC Discovery** document (`/wenisch-tech/keystone-oidc/.well-known/openid-configuration`) for zero-config clients |
 | ✅ | **JWKS endpoint** so clients can verify tokens without any shared secret |
 | ✅ | **Multi-client management** – create and manage as many clients as needed |
 | ✅ | **Client secret reset** – secrets shown only once, stored hashed |
@@ -74,7 +74,7 @@ Pretty permalinks must be **enabled** in WordPress (`Settings → Permalinks`). 
 
 ### Option A – Upload the ZIP (recommended)
 
-1. Download the latest `wp-oidcprovider-x.y.z.zip` from the [Releases page](https://github.com/wenisch-tech/wp-oidcprovider/releases).
+1. Download the latest `keystone-oidc-x.y.z.zip` from the [Releases page](https://github.com/wenisch-tech/keystone-oidc/releases).
 2. In your WordPress admin go to **Plugins → Add New → Upload Plugin**.
 3. Choose the downloaded ZIP and click **Install Now**.
 4. Click **Activate Plugin**.
@@ -82,7 +82,7 @@ Pretty permalinks must be **enabled** in WordPress (`Settings → Permalinks`). 
 ### Option B – Manual file copy
 
 1. Download and unzip the release archive.
-2. Copy the `wp-oidcprovider` folder to `wp-content/plugins/`.
+2. Copy the `keystone-oidc` folder to `wp-content/plugins/`.
 3. Activate the plugin in **Plugins → Installed Plugins**.
 
 ### What happens on activation
@@ -113,7 +113,7 @@ Click **Create Client**. You will be shown the **Client ID** and **Client Secret
 Point your OIDC client library at the discovery URL:
 
 ```
-https://your-wordpress-site.example.com/wenisch-tech/wp-oidcprovider/.well-known/openid-configuration
+https://your-wordpress-site.example.com/wenisch-tech/keystone-oidc/.well-known/openid-configuration
 ```
 
 Most OIDC libraries (e.g. `openid-client` for Node.js, `python-jose`, Keycloak adapters, Dex, etc.) will read this document and configure all endpoints automatically.
@@ -176,7 +176,7 @@ Displays read-only information about the server:
 ```
  Client App                WordPress (OIDC Provider)           User
      │                             │                             │
-    │── GET /wenisch-tech/wp-oidcprovider/oauth/authorize ──── │                             │
+    │── GET /wenisch-tech/keystone-oidc/oauth/authorize ──── │                             │
      │   ?response_type=code       │                             │
      │   &client_id=…              │                             │
      │   &redirect_uri=…           │                             │
@@ -194,7 +194,7 @@ Displays read-only information about the server:
      │◄── redirect to redirect_uri │                             │
      │    ?code=…&state=…          │                             │
      │                             │                             │
-    │── POST /wenisch-tech/wp-oidcprovider/oauth/token ─────── │                             │
+    │── POST /wenisch-tech/keystone-oidc/oauth/token ─────── │                             │
      │   grant_type=authorization_code                           │
      │   code=… redirect_uri=…     │                             │
      │   client_id=… client_secret=│                             │
@@ -202,19 +202,19 @@ Displays read-only information about the server:
      │◄── access_token + id_token  │                             │
      │    + refresh_token ──────── │                             │
      │                             │                             │
-    │── GET /wenisch-tech/wp-oidcprovider/oauth/userinfo ────── │                             │
+    │── GET /wenisch-tech/keystone-oidc/oauth/userinfo ────── │                             │
      │   Authorization: Bearer …   │                             │
      │                             │                             │
      │◄── { sub, name, email, … }  │                             │
 ```
 
-1. The client redirects the browser to `/wenisch-tech/wp-oidcprovider/oauth/authorize` with the standard parameters.
+1. The client redirects the browser to `/wenisch-tech/keystone-oidc/oauth/authorize` with the standard parameters.
 2. If the user is not logged in, WordPress's own login flow handles authentication and then redirects back to the authorize endpoint.
 3. A consent screen lists the scopes being requested and asks the user to **Allow** or **Deny**.
 4. On approval, a short-lived **authorization code** (valid 10 minutes, single-use) is issued and the browser is redirected to the client's `redirect_uri`.
-5. The client's back-end exchanges the code for tokens by calling `/wenisch-tech/wp-oidcprovider/oauth/token` (server-to-server).
+5. The client's back-end exchanges the code for tokens by calling `/wenisch-tech/keystone-oidc/oauth/token` (server-to-server).
 6. The plugin returns an **access token** (RS256 JWT), an **ID token** (RS256 JWT), and a **refresh token**.
-7. The client can call `/wenisch-tech/wp-oidcprovider/oauth/userinfo` at any time with the Bearer access token to retrieve up-to-date user claims.
+7. The client can call `/wenisch-tech/keystone-oidc/oauth/userinfo` at any time with the Bearer access token to retrieve up-to-date user claims.
 
 ### Token lifetimes
 
@@ -235,7 +235,7 @@ When the authorization request includes a `code_challenge`, the plugin stores it
 
 ### Signing keys
 
-On activation the plugin generates an RSA-2048 key pair using PHP's `openssl` extension. The private key is stored in the WordPress options table. The public key is published through the JWKS endpoint (`/wenisch-tech/wp-oidcprovider/oauth/jwks`) so that any client or resource server can verify tokens independently without trusting the plugin directly.
+On activation the plugin generates an RSA-2048 key pair using PHP's `openssl` extension. The private key is stored in the WordPress options table. The public key is published through the JWKS endpoint (`/wenisch-tech/keystone-oidc/oauth/jwks`) so that any client or resource server can verify tokens independently without trusting the plugin directly.
 
 The key ID (`kid`) in each JWT header lets clients efficiently look up the correct key from the JWKS when multiple keys are present during rotation.
 
@@ -258,23 +258,23 @@ All URLs are relative to your WordPress site root (e.g. `https://example.com`).
 
 | Endpoint | Method | Path |
 |---|---|---|
-| **Discovery** | GET | `/wenisch-tech/wp-oidcprovider/.well-known/openid-configuration` |
-| **Authorization** | GET / POST | `/wenisch-tech/wp-oidcprovider/oauth/authorize` |
-| **Token** | POST | `/wenisch-tech/wp-oidcprovider/oauth/token` |
-| **UserInfo** | GET | `/wenisch-tech/wp-oidcprovider/oauth/userinfo` |
-| **JWKS** | GET | `/wenisch-tech/wp-oidcprovider/oauth/jwks` |
+| **Discovery** | GET | `/wenisch-tech/keystone-oidc/.well-known/openid-configuration` |
+| **Authorization** | GET / POST | `/wenisch-tech/keystone-oidc/oauth/authorize` |
+| **Token** | POST | `/wenisch-tech/keystone-oidc/oauth/token` |
+| **UserInfo** | GET | `/wenisch-tech/keystone-oidc/oauth/userinfo` |
+| **JWKS** | GET | `/wenisch-tech/keystone-oidc/oauth/jwks` |
 
-### `GET /wenisch-tech/wp-oidcprovider/.well-known/openid-configuration`
+### `GET /wenisch-tech/keystone-oidc/.well-known/openid-configuration`
 
 Returns the [OIDC Discovery document](https://openid.net/specs/openid-connect-discovery-1_0.html) as JSON. Point your OIDC client library at this URL for automatic configuration.
 
 ```json
 {
   "issuer": "https://example.com",
-  "authorization_endpoint": "https://example.com/wenisch-tech/wp-oidcprovider/oauth/authorize",
-  "token_endpoint": "https://example.com/wenisch-tech/wp-oidcprovider/oauth/token",
-  "userinfo_endpoint": "https://example.com/wenisch-tech/wp-oidcprovider/oauth/userinfo",
-  "jwks_uri": "https://example.com/wenisch-tech/wp-oidcprovider/oauth/jwks",
+  "authorization_endpoint": "https://example.com/wenisch-tech/keystone-oidc/oauth/authorize",
+  "token_endpoint": "https://example.com/wenisch-tech/keystone-oidc/oauth/token",
+  "userinfo_endpoint": "https://example.com/wenisch-tech/keystone-oidc/oauth/userinfo",
+  "jwks_uri": "https://example.com/wenisch-tech/keystone-oidc/oauth/jwks",
   "scopes_supported": ["openid", "profile", "email"],
   "response_types_supported": ["code"],
   "grant_types_supported": ["authorization_code", "refresh_token"],
@@ -284,7 +284,7 @@ Returns the [OIDC Discovery document](https://openid.net/specs/openid-connect-di
 }
 ```
 
-### `GET /wenisch-tech/wp-oidcprovider/oauth/authorize`
+### `GET /wenisch-tech/keystone-oidc/oauth/authorize`
 
 Starts the authorization flow. Required parameters:
 
@@ -299,7 +299,7 @@ Starts the authorization flow. Required parameters:
 | `code_challenge` | PKCE | Base64url-encoded challenge |
 | `code_challenge_method` | PKCE | `S256` or `plain` |
 
-### `POST /wenisch-tech/wp-oidcprovider/oauth/token`
+### `POST /wenisch-tech/keystone-oidc/oauth/token`
 
 Exchanges an authorization code or refresh token for tokens.
 
@@ -338,7 +338,7 @@ Exchanges an authorization code or refresh token for tokens.
 }
 ```
 
-### `GET /wenisch-tech/wp-oidcprovider/oauth/userinfo`
+### `GET /wenisch-tech/keystone-oidc/oauth/userinfo`
 
 Returns claims for the authenticated user. Requires a valid Bearer token.
 
@@ -346,7 +346,7 @@ Returns claims for the authenticated user. Requires a valid Bearer token.
 Authorization: Bearer <access_token>
 ```
 
-### `GET /wenisch-tech/wp-oidcprovider/oauth/jwks`
+### `GET /wenisch-tech/keystone-oidc/oauth/jwks`
 
 Returns the public RSA key in [JWKS format](https://datatracker.ietf.org/doc/html/rfc7517). Use this to verify RS256-signed JWTs without contacting the token endpoint.
 
@@ -369,8 +369,8 @@ The `sub` claim is always the WordPress user's numeric ID (as a string), ensurin
 Every push to `main` automatically bumps the version (patch by default, following [Conventional Commits](https://www.conventionalcommits.org/)) via the [CI workflow](.github/workflows/ci.yml) which:
 
 1. Computes the next semver tag and generates a changelog.
-2. Patches the `Version:` header in `wp-oidcprovider.php` and `Stable tag:` in `readme.txt`.
-3. Creates a `wp-oidcprovider-x.y.z.zip` archive with `wp-oidcprovider/` as the root folder (the layout WordPress expects).
+2. Patches the `Version:` header in `keystone-oidc.php` and `Stable tag:` in `readme.txt`.
+3. Creates a `keystone-oidc-x.y.z.zip` archive with `wp-oidcprovider/` as the root folder (the layout WordPress expects).
 4. Publishes a GitHub Release with the ZIP attached as a downloadable asset.
 
 No manual tagging is required — just push to `main` and the pipeline handles everything.

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * OIDC Provider - Main Class
  *
@@ -10,8 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class WP_OIDC_Provider {
-	const ENDPOINT_BASE_PATH = 'wenisch-tech/wp-oidcprovider';
+class KEYSTONE_OIDC_Provider {
+	const ENDPOINT_BASE_PATH = 'wenisch-tech/keystone-oidc';
 
 	/**
 	 * Get endpoint base path relative to site root.
@@ -37,16 +37,16 @@ class WP_OIDC_Provider {
 		add_action( 'init', array( $this, 'register_rewrite_rules' ) );
 		add_filter( 'query_vars', array( $this, 'add_query_vars' ) );
 		add_action( 'template_redirect', array( $this, 'handle_request' ) );
-		add_action( 'wp_scheduled_delete', array( 'WP_OIDC_Token_Manager', 'cleanup_expired' ) );
+		add_action( 'wp_scheduled_delete', array( 'KEYSTONE_OIDC_Token_Manager', 'cleanup_expired' ) );
 	}
 
 	/**
 	 * Plugin activation: create tables, generate keys, flush rewrite rules.
 	 */
 	public static function activate() {
-		WP_OIDC_Client_Manager::create_tables();
-		if ( ! get_option( WP_OIDC_Token_Manager::OPTION_PRIVATE_KEY ) ) {
-			WP_OIDC_Token_Manager::generate_keys();
+		KEYSTONE_OIDC_Client_Manager::create_tables();
+		if ( ! get_option( KEYSTONE_OIDC_Token_Manager::OPTION_PRIVATE_KEY ) ) {
+			KEYSTONE_OIDC_Token_Manager::generate_keys();
 		}
 		self::register_rewrite_rules_static();
 		flush_rewrite_rules();
@@ -125,7 +125,7 @@ class WP_OIDC_Provider {
 	// -------------------------------------------------------------------------
 
 	private function handle_discovery() {
-		$issuer = WP_OIDC_Token_Manager::get_issuer();
+		$issuer = KEYSTONE_OIDC_Token_Manager::get_issuer();
 
 		$discovery = array(
 			'issuer'                                => $issuer,
@@ -167,13 +167,13 @@ class WP_OIDC_Provider {
 			return;
 		}
 
-		$client = WP_OIDC_Client_Manager::get_client( $client_id );
+		$client = KEYSTONE_OIDC_Client_Manager::get_client( $client_id );
 		if ( ! $client ) {
 			$this->send_json_error( array( 'error' => 'invalid_client', 'error_description' => 'Unknown client.' ), 400 );
 			return;
 		}
 
-		if ( ! WP_OIDC_Client_Manager::validate_redirect_uri( $client_id, $redirect_uri ) ) {
+		if ( ! KEYSTONE_OIDC_Client_Manager::validate_redirect_uri( $client_id, $redirect_uri ) ) {
 			$this->send_json_error( array( 'error' => 'invalid_request', 'error_description' => 'Invalid redirect_uri.' ), 400 );
 			return;
 		}
@@ -213,7 +213,7 @@ class WP_OIDC_Provider {
 			return;
 		}
 
-		$code = WP_OIDC_Token_Manager::generate_auth_code( $client_id, $user_id, $redirect_uri, $scope, $nonce, $code_challenge, $code_challenge_method );
+		$code = KEYSTONE_OIDC_Token_Manager::generate_auth_code( $client_id, $user_id, $redirect_uri, $scope, $nonce, $code_challenge, $code_challenge_method );
 
 		$params = array( 'code' => $code );
 		if ( $state ) {
@@ -229,14 +229,14 @@ class WP_OIDC_Provider {
 
 	private function render_consent_page( $client, $scope, $state, $nonce, $redirect_uri, $code_challenge, $code_challenge_method ) {
 		$user        = wp_get_current_user();
-		$plugin_url  = WP_OIDC_PLUGIN_URL;
+		$plugin_url  = KEYSTONE_OIDC_PLUGIN_URL;
 		$scope_labels = array(
-			'openid'  => __( 'Verify your identity', 'wp-oidcprovider' ),
-			'profile' => __( 'Access your name and username', 'wp-oidcprovider' ),
-			'email'   => __( 'Access your email address', 'wp-oidcprovider' ),
+			'openid'  => __( 'Verify your identity', 'keystone-oidc' ),
+			'profile' => __( 'Access your name and username', 'keystone-oidc' ),
+			'email'   => __( 'Access your email address', 'keystone-oidc' ),
 		);
 		$requested_scopes = explode( ' ', $scope );
-		include WP_OIDC_PLUGIN_DIR . 'includes/views/consent.php';
+		include KEYSTONE_OIDC_PLUGIN_DIR . 'includes/views/consent.php';
 		exit;
 	}
 
@@ -275,7 +275,7 @@ class WP_OIDC_Provider {
 		$code_verifier = isset( $_POST['code_verifier'] ) ? sanitize_text_field( wp_unslash( $_POST['code_verifier'] ) ) : null;
 		// phpcs:enable
 
-		$client = WP_OIDC_Client_Manager::get_client( $client_id );
+		$client = KEYSTONE_OIDC_Client_Manager::get_client( $client_id );
 		if ( ! $client ) {
 			$this->send_json_error( array( 'error' => 'invalid_client', 'error_description' => 'Unknown client.' ), 401 );
 			return;
@@ -283,7 +283,7 @@ class WP_OIDC_Provider {
 
 		// Verify client secret (only when provided — public clients may use PKCE without secret).
 		if ( $client_secret ) {
-			if ( ! WP_OIDC_Client_Manager::verify_secret( $client_secret, $client->client_secret ) ) {
+			if ( ! KEYSTONE_OIDC_Client_Manager::verify_secret( $client_secret, $client->client_secret ) ) {
 				$this->send_json_error( array( 'error' => 'invalid_client', 'error_description' => 'Invalid client credentials.' ), 401 );
 				return;
 			}
@@ -302,13 +302,13 @@ class WP_OIDC_Provider {
 	}
 
 	private function handle_auth_code_grant( $client_id, $code, $redirect_uri, $code_verifier ) {
-		$auth_code = WP_OIDC_Token_Manager::consume_auth_code( $code, $client_id, $redirect_uri, $code_verifier );
+		$auth_code = KEYSTONE_OIDC_Token_Manager::consume_auth_code( $code, $client_id, $redirect_uri, $code_verifier );
 		if ( is_wp_error( $auth_code ) ) {
 			$this->send_json_error( array( 'error' => $auth_code->get_error_code(), 'error_description' => $auth_code->get_error_message() ), 400 );
 			return;
 		}
 
-		$tokens = WP_OIDC_Token_Manager::issue_tokens( $client_id, $auth_code->user_id, $auth_code->scope, $auth_code->nonce );
+		$tokens = KEYSTONE_OIDC_Token_Manager::issue_tokens( $client_id, $auth_code->user_id, $auth_code->scope, $auth_code->nonce );
 
 		$this->send_json(
 			array(
@@ -328,7 +328,7 @@ class WP_OIDC_Provider {
 			return;
 		}
 
-		$tokens = WP_OIDC_Token_Manager::refresh_tokens( $refresh_token, $client_id );
+		$tokens = KEYSTONE_OIDC_Token_Manager::refresh_tokens( $refresh_token, $client_id );
 		if ( is_wp_error( $tokens ) ) {
 			$this->send_json_error( array( 'error' => $tokens->get_error_code(), 'error_description' => $tokens->get_error_message() ), 400 );
 			return;
@@ -368,7 +368,7 @@ class WP_OIDC_Provider {
 			return;
 		}
 
-		$payload = WP_OIDC_Token_Manager::validate_access_token( $access_token );
+		$payload = KEYSTONE_OIDC_Token_Manager::validate_access_token( $access_token );
 		if ( is_wp_error( $payload ) ) {
 			header( 'WWW-Authenticate: Bearer error="' . esc_attr( $payload->get_error_code() ) . '"' );
 			$this->send_json_error( array( 'error' => $payload->get_error_code(), 'error_description' => $payload->get_error_message() ), 401 );
@@ -406,7 +406,7 @@ class WP_OIDC_Provider {
 	// -------------------------------------------------------------------------
 
 	private function handle_jwks() {
-		$this->send_json( WP_OIDC_Token_Manager::get_jwks() );
+		$this->send_json( KEYSTONE_OIDC_Token_Manager::get_jwks() );
 	}
 
 	// -------------------------------------------------------------------------

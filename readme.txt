@@ -1,4 +1,4 @@
-=== WP OIDC Provider ===
+﻿=== Keystone OIDC ===
 Contributors: wenisch-tech
 Tags: oidc, openid-connect, sso, authentication, oauth2
 Requires at least: 5.6
@@ -12,7 +12,7 @@ Turn your WordPress site into an OpenID Connect (OIDC) identity provider. Manage
 
 == Description ==
 
-WP OIDC Provider transforms your WordPress installation into a fully-featured **OpenID Connect (OIDC) identity provider**, allowing other applications to authenticate users via your WordPress user database.
+Keystone OIDC transforms your WordPress installation into a fully-featured **OpenID Connect (OIDC) identity provider**, allowing other applications to authenticate users via your WordPress user database.
 
 = Key Features =
 
@@ -20,7 +20,7 @@ WP OIDC Provider transforms your WordPress installation into a fully-featured **
 * **RS256 JWT** signed access tokens and ID tokens
 * **Admin UI** to create and manage multiple OIDC clients
 * **Client secret management** – generate and reset secrets securely (shown only once)
-* **OIDC Discovery** endpoint (`/wenisch-tech/wp-oidcprovider/.well-known/openid-configuration`) for automatic client configuration
+* **OIDC Discovery** endpoint (`/wenisch-tech/keystone-oidc/.well-known/openid-configuration`) for automatic client configuration
 * **Standard scopes**: `openid`, `profile`, `email`
 * **Refresh tokens** for long-lived sessions
 * **Zero additional configuration** after install – just create a client and you're ready
@@ -29,11 +29,11 @@ WP OIDC Provider transforms your WordPress installation into a fully-featured **
 
 | Endpoint | URL |
 |---|---|
-| Discovery | `/wenisch-tech/wp-oidcprovider/.well-known/openid-configuration` |
-| Authorization | `/wenisch-tech/wp-oidcprovider/oauth/authorize` |
-| Token | `/wenisch-tech/wp-oidcprovider/oauth/token` |
-| UserInfo | `/wenisch-tech/wp-oidcprovider/oauth/userinfo` |
-| JWKS | `/wenisch-tech/wp-oidcprovider/oauth/jwks` |
+| Discovery | `/wenisch-tech/keystone-oidc/.well-known/openid-configuration` |
+| Authorization | `/wenisch-tech/keystone-oidc/oauth/authorize` |
+| Token | `/wenisch-tech/keystone-oidc/oauth/token` |
+| UserInfo | `/wenisch-tech/keystone-oidc/oauth/userinfo` |
+| JWKS | `/wenisch-tech/keystone-oidc/oauth/jwks` |
 
 = Quick Start =
 
@@ -45,11 +45,11 @@ WP OIDC Provider transforms your WordPress installation into a fully-featured **
 
 == Installation ==
 
-1. Upload the `wp-oidcprovider` folder to `/wp-content/plugins/`
+1. Upload the `keystone-oidc` folder to `/wp-content/plugins/`
 2. Activate the plugin through the **Plugins** menu
 3. Navigate to **OIDC Provider** in the admin sidebar to create your first client
 
-Alternatively, download the `wp-oidcprovider.zip` from the [GitHub Releases](https://github.com/wenisch-tech/wp-oidcprovider/releases) page and upload it via **Plugins → Add New → Upload Plugin**.
+Alternatively, download the `keystone-oidc.zip` from the [GitHub Releases](https://github.com/wenisch-tech/keystone-oidc/releases) page and upload it via **Plugins → Add New → Upload Plugin**.
 
 == Frequently Asked Questions ==
 
