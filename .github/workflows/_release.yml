@@ -37,7 +37,7 @@ jobs:
       - name: Create plugin ZIP
         run: |
           VERSION="${{ inputs.version }}"
-          PLUGIN_DIR="wp-oidcprovider"
+          PLUGIN_DIR="keystone-oidc"
           ARCHIVE="keystone-oidc-${VERSION}.zip"
 
           mkdir -p "/tmp/${PLUGIN_DIR}"
