@@ -18,6 +18,26 @@ class WP_OIDC_Admin {
 		add_action( 'admin_post_wp_oidc_delete_client', array( $this, 'handle_delete_client' ) );
 		add_action( 'admin_post_wp_oidc_reset_secret', array( $this, 'handle_reset_secret' ) );
 		add_action( 'admin_post_wp_oidc_rotate_keys', array( $this, 'handle_rotate_keys' ) );
+		add_filter( 'plugin_action_links_' . plugin_basename( WP_OIDC_PLUGIN_FILE ), array( $this, 'add_plugin_action_links' ) );
+	}
+
+	// -------------------------------------------------------------------------
+	// Plugin action links
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Add Settings link to plugin action links on plugins page.
+	 *
+	 * @param array $links Existing plugin action links.
+	 * @return array
+	 */
+	public function add_plugin_action_links( $links ) {
+		$settings_link = sprintf(
+			'<a href="%s">%s</a>',
+			esc_url( admin_url( 'admin.php?page=wp-oidc-settings' ) ),
+			esc_html__( 'Settings', 'wp-oidcprovider' )
+		);
+		return array_merge( array( $settings_link ), $links );
 	}
 
 	// -------------------------------------------------------------------------
