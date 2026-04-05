@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Uninstall Keystone OIDC
  *
