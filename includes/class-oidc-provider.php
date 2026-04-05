@@ -193,7 +193,7 @@ class KEYSTONE_OIDC_Provider {
 		}
 
 		// Handle POST (form submit for consent).
-		if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
+		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 			$this->handle_authorize_post( $client_id, $redirect_uri, $scope, $state, $nonce, $code_challenge, $code_challenge_method );
 			return;
 		}
@@ -245,7 +245,7 @@ class KEYSTONE_OIDC_Provider {
 	// -------------------------------------------------------------------------
 
 	private function handle_token() {
-		if ( 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
+		if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
 			$this->send_json_error( array( 'error' => 'invalid_request', 'error_description' => 'POST required.' ), 405 );
 			return;
 		}

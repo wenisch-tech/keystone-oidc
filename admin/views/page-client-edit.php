@@ -11,70 +11,71 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$is_edit  = isset( $client ) && $client;
-$page     = $is_edit ? 'wp-oidc-clients' : 'wp-oidc-add-client';
+$keystone_oidc_is_edit  = isset( $client ) && $client;
+$keystone_oidc_page     = $keystone_oidc_is_edit ? 'wp-oidc-clients' : 'wp-oidc-add-client';
 // phpcs:disable WordPress.Security.NonceVerification.Recommended
-$created      = isset( $_GET['created'] ) && '1' === $_GET['created'];
-$updated      = isset( $_GET['updated'] ) && '1' === $_GET['updated'];
-$secret_reset = isset( $_GET['secret_reset'] ) && '1' === $_GET['secret_reset'];
-$error        = isset( $_GET['error'] ) ? sanitize_text_field( wp_unslash( $_GET['error'] ) ) : '';
+$keystone_oidc_created      = isset( $_GET['created'] ) && '1' === $_GET['created'];
+$keystone_oidc_updated      = isset( $_GET['updated'] ) && '1' === $_GET['updated'];
+$keystone_oidc_secret_reset = isset( $_GET['secret_reset'] ) && '1' === $_GET['secret_reset'];
+$keystone_oidc_error        = isset( $_GET['error'] ) ? sanitize_text_field( wp_unslash( $_GET['error'] ) ) : '';
 // phpcs:enable
 
-$new_secret = '';
-if ( $is_edit && ( $created || $secret_reset ) ) {
-	$new_secret = get_transient( 'keystone_oidc_new_secret_' . $client->client_id );
-	if ( $new_secret ) {
+$keystone_oidc_new_secret = '';
+if ( $keystone_oidc_is_edit && ( $keystone_oidc_created || $keystone_oidc_secret_reset ) ) {
+	$keystone_oidc_new_secret = get_transient( 'keystone_oidc_new_secret_' . $client->client_id );
+	if ( $keystone_oidc_new_secret ) {
 		delete_transient( 'keystone_oidc_new_secret_' . $client->client_id );
 	}
 }
 
-$redirect_uris_text = '';
-if ( $is_edit ) {
-	$uris = KEYSTONE_OIDC_Client_Manager::get_redirect_uris( $client );
-	$redirect_uris_text = implode( "\n", $uris );
+$keystone_oidc_redirect_uris_text = '';
+if ( $keystone_oidc_is_edit ) {
+	$keystone_oidc_uris = KEYSTONE_OIDC_Client_Manager::get_redirect_uris( $client );
+	$keystone_oidc_redirect_uris_text = implode( "\n", $keystone_oidc_uris );
 }
 
-$all_scopes = array(
+$keystone_oidc_all_scopes = array(
 	'openid'  => __( 'openid – Required for OIDC', 'keystone-oidc' ),
 	'profile' => __( 'profile – Name, username', 'keystone-oidc' ),
 	'email'   => __( 'email – Email address', 'keystone-oidc' ),
 );
 
-$active_scopes = $is_edit ? explode( ' ', $client->allowed_scopes ) : array( 'openid', 'profile', 'email' );
+$keystone_oidc_active_scopes = $keystone_oidc_is_edit ? explode( ' ', $client->allowed_scopes ) : array( 'openid', 'profile', 'email' );
 
-$title = $is_edit
+$keystone_oidc_title = $keystone_oidc_is_edit
+	/* translators: %s: client name */
 	? sprintf( __( 'Edit Client: %s', 'keystone-oidc' ), esc_html( $client->client_name ) )
 	: __( 'Add New Client', 'keystone-oidc' );
 ?>
 <div class="wrap wp-oidc-wrap">
-	<h1 class="wp-heading-inline"><?php echo esc_html( $title ); ?></h1>
-	<?php if ( ! $is_edit ) : ?>
+	<h1 class="wp-heading-inline"><?php echo esc_html( $keystone_oidc_title ); ?></h1>
+	<?php if ( ! $keystone_oidc_is_edit ) : ?>
 		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-oidc-clients' ) ); ?>" class="page-title-action">
 			&larr; <?php esc_html_e( 'Back to Clients', 'keystone-oidc' ); ?>
 		</a>
 	<?php endif; ?>
 	<hr class="wp-header-end">
 
-	<?php if ( $error === 'missing_fields' ) : ?>
+	<?php if ( $keystone_oidc_error === 'missing_fields' ) : ?>
 		<div class="notice notice-error"><p><?php esc_html_e( 'Please fill in all required fields.', 'keystone-oidc' ); ?></p></div>
-	<?php elseif ( $error === 'db_error' ) : ?>
+	<?php elseif ( $keystone_oidc_error === 'db_error' ) : ?>
 		<div class="notice notice-error"><p><?php esc_html_e( 'A database error occurred. Please try again.', 'keystone-oidc' ); ?></p></div>
-	<?php elseif ( $error === 'reset_failed' ) : ?>
+	<?php elseif ( $keystone_oidc_error === 'reset_failed' ) : ?>
 		<div class="notice notice-error"><p><?php esc_html_e( 'Failed to reset client secret.', 'keystone-oidc' ); ?></p></div>
 	<?php endif; ?>
 
-	<?php if ( $updated ) : ?>
+	<?php if ( $keystone_oidc_updated ) : ?>
 		<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Client updated successfully.', 'keystone-oidc' ); ?></p></div>
 	<?php endif; ?>
 
-	<?php if ( $new_secret ) : ?>
+	<?php if ( $keystone_oidc_new_secret ) : ?>
 		<div class="notice notice-warning wp-oidc-secret-notice">
 			<p>
-				<strong><?php echo $created ? esc_html__( 'Client created!', 'keystone-oidc' ) : esc_html__( 'Secret reset!', 'keystone-oidc' ); ?></strong>
+				<strong><?php echo $keystone_oidc_created ? esc_html__( 'Client created!', 'keystone-oidc' ) : esc_html__( 'Secret reset!', 'keystone-oidc' ); ?></strong>
 				<?php esc_html_e( 'Copy your client secret now – it will not be shown again.', 'keystone-oidc' ); ?>
 			</p>
 			<div class="wp-oidc-secret-box">
-				<code id="client-secret-value"><?php echo esc_html( $new_secret ); ?></code>
+				<code id="client-secret-value"><?php echo esc_html( $keystone_oidc_new_secret ); ?></code>
 				<button type="button" class="button button-small wp-oidc-copy-btn" data-target="client-secret-value">
 					<?php esc_html_e( 'Copy', 'keystone-oidc' ); ?>
 				</button>
@@ -82,7 +83,7 @@ $title = $is_edit
 		</div>
 	<?php endif; ?>
 
-	<?php if ( $is_edit ) : ?>
+	<?php if ( $keystone_oidc_is_edit ) : ?>
 		<!-- Client credentials display -->
 		<div class="wp-oidc-credentials-card">
 			<h2><?php esc_html_e( 'Client Credentials', 'keystone-oidc' ); ?></h2>
@@ -130,7 +131,7 @@ $title = $is_edit
 
 	<!-- Edit / Create form -->
 	<div class="wp-oidc-form-card">
-		<?php if ( $is_edit ) : ?>
+		<?php if ( $keystone_oidc_is_edit ) : ?>
 			<h2><?php esc_html_e( 'Configuration', 'keystone-oidc' ); ?></h2>
 		<?php else : ?>
 			<h2><?php esc_html_e( 'Client Details', 'keystone-oidc' ); ?></h2>
@@ -138,7 +139,7 @@ $title = $is_edit
 		<form method="POST" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<?php wp_nonce_field( 'keystone_oidc_save_client' ); ?>
 			<input type="hidden" name="action" value="keystone_oidc_save_client">
-			<?php if ( $is_edit ) : ?>
+			<?php if ( $keystone_oidc_is_edit ) : ?>
 				<input type="hidden" name="client_id" value="<?php echo esc_attr( $client->client_id ); ?>">
 			<?php endif; ?>
 
@@ -149,7 +150,7 @@ $title = $is_edit
 					</th>
 					<td>
 						<input type="text" id="client_name" name="client_name" class="regular-text"
-							value="<?php echo $is_edit ? esc_attr( $client->client_name ) : ''; ?>"
+							value="<?php echo $keystone_oidc_is_edit ? esc_attr( $client->client_name ) : ''; ?>"
 							placeholder="<?php esc_attr_e( 'My Application', 'keystone-oidc' ); ?>" required>
 						<p class="description"><?php esc_html_e( 'A friendly name for this client application.', 'keystone-oidc' ); ?></p>
 					</td>
@@ -160,22 +161,22 @@ $title = $is_edit
 					</th>
 					<td>
 						<textarea id="redirect_uris" name="redirect_uris" rows="4" class="large-text code"
-							placeholder="https://example.com/callback" required><?php echo esc_textarea( $redirect_uris_text ); ?></textarea>
+							placeholder="https://example.com/callback" required><?php echo esc_textarea( $keystone_oidc_redirect_uris_text ); ?></textarea>
 						<p class="description"><?php esc_html_e( 'One URI per line. These are the allowed callback URLs after authorization.', 'keystone-oidc' ); ?></p>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Allowed Scopes', 'keystone-oidc' ); ?></th>
 					<td>
-						<?php foreach ( $all_scopes as $scope_key => $scope_label ) : ?>
+						<?php foreach ( $keystone_oidc_all_scopes as $keystone_oidc_scope_key => $keystone_oidc_scope_label ) : ?>
 							<label class="wp-oidc-scope-label">
-								<input type="checkbox" name="scope_<?php echo esc_attr( $scope_key ); ?>" value="1"
-									<?php checked( in_array( $scope_key, $active_scopes, true ) ); ?>
-									<?php if ( 'openid' === $scope_key ) { echo 'disabled checked'; } ?>>
-								<?php echo esc_html( $scope_label ); ?>
+								<input type="checkbox" name="scope_<?php echo esc_attr( $keystone_oidc_scope_key ); ?>" value="1"
+									<?php checked( in_array( $keystone_oidc_scope_key, $keystone_oidc_active_scopes, true ) ); ?>
+									<?php if ( 'openid' === $keystone_oidc_scope_key ) { echo 'disabled checked'; } ?>>
+								<?php echo esc_html( $keystone_oidc_scope_label ); ?>
 							</label><br>
 						<?php endforeach; ?>
-						<input type="hidden" name="allowed_scopes" id="allowed_scopes_hidden" value="<?php echo esc_attr( implode( ' ', $active_scopes ) ); ?>">
+						<input type="hidden" name="allowed_scopes" id="allowed_scopes_hidden" value="<?php echo esc_attr( implode( ' ', $keystone_oidc_active_scopes ) ); ?>">
 						<p class="description"><?php esc_html_e( 'The "openid" scope is always required.', 'keystone-oidc' ); ?></p>
 					</td>
 				</tr>
@@ -183,13 +184,13 @@ $title = $is_edit
 
 			<p class="submit">
 				<button type="submit" class="button button-primary">
-					<?php if ( $is_edit ) : ?>
+					<?php if ( $keystone_oidc_is_edit ) : ?>
 						<?php esc_html_e( 'Save Changes', 'keystone-oidc' ); ?>
 					<?php else : ?>
 						<?php esc_html_e( 'Create Client', 'keystone-oidc' ); ?>
 					<?php endif; ?>
 				</button>
-				<?php if ( $is_edit ) : ?>
+				<?php if ( $keystone_oidc_is_edit ) : ?>
 					<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-oidc-clients' ) ); ?>" class="button">
 						<?php esc_html_e( 'Cancel', 'keystone-oidc' ); ?>
 					</a>
@@ -198,7 +199,7 @@ $title = $is_edit
 		</form>
 	</div>
 
-	<?php if ( $is_edit ) : ?>
+	<?php if ( $keystone_oidc_is_edit ) : ?>
 		<div class="wp-oidc-danger-zone">
 			<h2><?php esc_html_e( 'Danger Zone', 'keystone-oidc' ); ?></h2>
 			<p><?php esc_html_e( 'Deleting a client is permanent and will revoke all associated tokens.', 'keystone-oidc' ); ?></p>

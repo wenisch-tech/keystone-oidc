@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // phpcs:disable WordPress.Security.NonceVerification.Recommended
-$deleted = isset( $_GET['deleted'] ) && '1' === $_GET['deleted'];
+$keystone_oidc_deleted = isset( $_GET['deleted'] ) && '1' === $_GET['deleted'];
 // phpcs:enable
 ?>
 <div class="wrap wp-oidc-wrap">
@@ -21,7 +21,7 @@ $deleted = isset( $_GET['deleted'] ) && '1' === $_GET['deleted'];
 	</a>
 	<hr class="wp-header-end">
 
-	<?php if ( $deleted ) : ?>
+	<?php if ( $keystone_oidc_deleted ) : ?>
 		<div class="notice notice-success is-dismissible">
 			<p><?php esc_html_e( 'Client deleted successfully.', 'keystone-oidc' ); ?></p>
 		</div>
@@ -58,31 +58,31 @@ $deleted = isset( $_GET['deleted'] ) && '1' === $_GET['deleted'];
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach ( $clients as $row ) : ?>
+				<?php foreach ( $clients as $keystone_oidc_client_row ) : ?>
 					<tr>
 						<td class="column-name">
 							<strong>
-								<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-oidc-clients&client_id=' . urlencode( $row->client_id ) ) ); ?>">
-									<?php echo esc_html( $row->client_name ); ?>
+								<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-oidc-clients&client_id=' . urlencode( $keystone_oidc_client_row->client_id ) ) ); ?>">
+									<?php echo esc_html( $keystone_oidc_client_row->client_name ); ?>
 								</a>
 							</strong>
 						</td>
 						<td class="column-client-id">
-							<code><?php echo esc_html( $row->client_id ); ?></code>
+							<code><?php echo esc_html( $keystone_oidc_client_row->client_id ); ?></code>
 						</td>
 						<td class="column-scopes">
 							<?php
-							$scopes = explode( ' ', $row->allowed_scopes );
-							foreach ( $scopes as $s ) {
-								echo '<span class="wp-oidc-scope-badge">' . esc_html( $s ) . '</span> ';
+							$keystone_oidc_scopes = explode( ' ', $keystone_oidc_client_row->allowed_scopes );
+							foreach ( $keystone_oidc_scopes as $keystone_oidc_scope ) {
+								echo '<span class="wp-oidc-scope-badge">' . esc_html( $keystone_oidc_scope ) . '</span> ';
 							}
 							?>
 						</td>
 						<td class="column-created">
-							<?php echo esc_html( wp_date( get_option( 'date_format' ), strtotime( $row->created_at ) ) ); ?>
+							<?php echo esc_html( wp_date( get_option( 'date_format' ), strtotime( $keystone_oidc_client_row->created_at ) ) ); ?>
 						</td>
 						<td class="column-actions">
-							<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-oidc-clients&client_id=' . urlencode( $row->client_id ) ) ); ?>" class="button button-small">
+							<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-oidc-clients&client_id=' . urlencode( $keystone_oidc_client_row->client_id ) ) ); ?>" class="button button-small">
 								<?php esc_html_e( 'Edit', 'keystone-oidc' ); ?>
 							</a>
 						</td>

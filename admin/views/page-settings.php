@@ -8,23 +8,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // phpcs:disable WordPress.Security.NonceVerification.Recommended
-$keys_rotated = isset( $_GET['keys_rotated'] ) && '1' === $_GET['keys_rotated'];
-$key_error    = isset( $_GET['key_error'] ) && '1' === $_GET['key_error'];
+$keystone_oidc_keys_rotated = isset( $_GET['keys_rotated'] ) && '1' === $_GET['keys_rotated'];
+$keystone_oidc_key_error    = isset( $_GET['key_error'] ) && '1' === $_GET['key_error'];
 // phpcs:enable
 
-$issuer = KEYSTONE_OIDC_Token_Manager::get_issuer();
-$kid    = KEYSTONE_OIDC_Token_Manager::get_key_id();
+$keystone_oidc_issuer = KEYSTONE_OIDC_Token_Manager::get_issuer();
+$keystone_oidc_kid    = KEYSTONE_OIDC_Token_Manager::get_key_id();
 ?>
 <div class="wrap wp-oidc-wrap">
 	<h1><?php esc_html_e( 'OIDC Provider Settings', 'keystone-oidc' ); ?></h1>
 	<hr class="wp-header-end">
 
-	<?php if ( $keys_rotated ) : ?>
+	<?php if ( $keystone_oidc_keys_rotated ) : ?>
 		<div class="notice notice-success is-dismissible">
 			<p><?php esc_html_e( 'Signing keys rotated successfully. Existing tokens will no longer validate.', 'keystone-oidc' ); ?></p>
 		</div>
 	<?php endif; ?>
-	<?php if ( $key_error ) : ?>
+	<?php if ( $keystone_oidc_key_error ) : ?>
 		<div class="notice notice-error is-dismissible">
 			<p><?php esc_html_e( 'Failed to generate new signing keys. Check that OpenSSL is available.', 'keystone-oidc' ); ?></p>
 		</div>
@@ -35,7 +35,7 @@ $kid    = KEYSTONE_OIDC_Token_Manager::get_key_id();
 		<table class="wp-oidc-credentials-table">
 			<tr>
 				<th><?php esc_html_e( 'Issuer URL', 'keystone-oidc' ); ?></th>
-				<td><code><?php echo esc_html( $issuer ); ?></code></td>
+				<td><code><?php echo esc_html( $keystone_oidc_issuer ); ?></code></td>
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'Discovery Endpoint', 'keystone-oidc' ); ?></th>
@@ -59,7 +59,7 @@ $kid    = KEYSTONE_OIDC_Token_Manager::get_key_id();
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'Current Key ID (kid)', 'keystone-oidc' ); ?></th>
-				<td><code><?php echo esc_html( $kid ); ?></code></td>
+				<td><code><?php echo esc_html( $keystone_oidc_kid ); ?></code></td>
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'Plugin Version', 'keystone-oidc' ); ?></th>
