@@ -14,6 +14,30 @@ class KEYSTONE_OIDC_Client_Manager {
 	const TABLE_CLIENTS    = 'oidc_clients';
 	const TABLE_AUTH_CODES = 'oidc_auth_codes';
 	const TABLE_TOKENS     = 'oidc_tokens';
+	const CACHE_GROUP      = 'keystone_oidc';
+	const CACHE_ALL_CLIENTS = 'all_clients';
+
+	/**
+	 * Build a cache key for a single client.
+	 *
+	 * @param string $client_id Client ID.
+	 * @return string
+	 */
+	private static function client_cache_key( $client_id ) {
+		return 'client_' . $client_id;
+	}
+
+	/**
+	 * Invalidate cached client entries.
+	 *
+	 * @param string|null $client_id Optional client ID.
+	 */
+	private static function invalidate_client_cache( $client_id = null ) {
+		wp_cache_delete( self::CACHE_ALL_CLIENTS, self::CACHE_GROUP );
+		if ( $client_id ) {
+			wp_cache_delete( self::client_cache_key( $client_id ), self::CACHE_GROUP );
+		}
+	}
 
 	/**
 	 * Create the required database tables.
@@ -86,6 +110,8 @@ class KEYSTONE_OIDC_Client_Manager {
 		$wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . self::TABLE_AUTH_CODES );
 		$wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . self::TABLE_CLIENTS );
 		// phpcs:enable
+
+		self::invalidate_client_cache();
 	}
 
 	/**
@@ -158,6 +184,8 @@ class KEYSTONE_OIDC_Client_Manager {
 			return new WP_Error( 'db_error', __( 'Failed to create client.', 'keystone-oidc' ) );
 		}
 
+		self::invalidate_client_cache( $client_id );
+
 		return array(
 			'client_id'     => $client_id,
 			'client_secret' => $plain_secret,
@@ -192,6 +220,8 @@ class KEYSTONE_OIDC_Client_Manager {
 			return new WP_Error( 'db_error', __( 'Failed to update client.', 'keystone-oidc' ) );
 		}
 
+		self::invalidate_client_cache( $client_id );
+
 		return true;
 	}
 
@@ -219,6 +249,8 @@ class KEYSTONE_OIDC_Client_Manager {
 			return new WP_Error( 'db_error', __( 'Failed to reset client secret.', 'keystone-oidc' ) );
 		}
 
+		self::invalidate_client_cache( $client_id );
+
 		return $plain_secret;
 	}
 
@@ -235,6 +267,8 @@ class KEYSTONE_OIDC_Client_Manager {
 		$wpdb->delete( $wpdb->prefix . self::TABLE_TOKENS, array( 'client_id' => $client_id ), array( '%s' ) );
 		$result = $wpdb->delete( $wpdb->prefix . self::TABLE_CLIENTS, array( 'client_id' => $client_id ), array( '%s' ) );
 
+		self::invalidate_client_cache( $client_id );
+
 		return false !== $result;
 	}
 
@@ -246,9 +280,21 @@ class KEYSTONE_OIDC_Client_Manager {
 	 */
 	public static function get_client( $client_id ) {
 		global $wpdb;
+
+		$cache_key = self::client_cache_key( $client_id );
+		$found     = false;
+		$cached    = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
+		if ( $found ) {
+			return $cached;
+		}
+
 		$table = $wpdb->prefix . self::TABLE_CLIENTS;
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE client_id = %s", $client_id ) );
+		$client = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE client_id = %s", $client_id ) );
+
+		wp_cache_set( $cache_key, $client, self::CACHE_GROUP, 300 );
+
+		return $client;
 	}
 
 	/**
@@ -258,9 +304,20 @@ class KEYSTONE_OIDC_Client_Manager {
 	 */
 	public static function get_all_clients() {
 		global $wpdb;
+
+		$found  = false;
+		$cached = wp_cache_get( self::CACHE_ALL_CLIENTS, self::CACHE_GROUP, false, $found );
+		if ( $found ) {
+			return $cached;
+		}
+
 		$table = $wpdb->prefix . self::TABLE_CLIENTS;
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return $wpdb->get_results( "SELECT * FROM {$table} ORDER BY created_at DESC" );
+		$clients = $wpdb->get_results( "SELECT * FROM {$table} ORDER BY created_at DESC" );
+
+		wp_cache_set( self::CACHE_ALL_CLIENTS, $clients, self::CACHE_GROUP, 300 );
+
+		return $clients;
 	}
 
 	/**

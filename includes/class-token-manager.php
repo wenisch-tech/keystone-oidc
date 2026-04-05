@@ -14,10 +14,32 @@ class KEYSTONE_OIDC_Token_Manager {
 	const OPTION_PRIVATE_KEY = 'keystone_oidc_private_key';
 	const OPTION_PUBLIC_KEY  = 'keystone_oidc_public_key';
 	const OPTION_KEY_ID      = 'keystone_oidc_key_id';
+	const CACHE_GROUP        = 'keystone_oidc';
 
 	const AUTH_CODE_LIFETIME    = 600;       // 10 minutes.
 	const ACCESS_TOKEN_LIFETIME = 3600;      // 1 hour.
 	const REFRESH_TOKEN_LIFETIME = 2592000;  // 30 days.
+
+	/**
+	 * Build cache key for authorization code record.
+	 *
+	 * @param string $code Authorization code.
+	 * @return string
+	 */
+	private static function auth_code_cache_key( $code ) {
+		return 'auth_code_' . $code;
+	}
+
+	/**
+	 * Build cache key for token lookup.
+	 *
+	 * @param string $token_type Token type.
+	 * @param string $hash       Token hash.
+	 * @return string
+	 */
+	private static function token_cache_key( $token_type, $hash ) {
+		return 'token_' . $token_type . '_' . $hash;
+	}
 
 	/**
 	 * Generate and store RSA key pair.
@@ -253,10 +275,16 @@ class KEYSTONE_OIDC_Token_Manager {
 	 */
 	public static function consume_auth_code( $code, $client_id, $redirect_uri, $code_verifier = null ) {
 		global $wpdb;
+		$cache_key = self::auth_code_cache_key( $code );
+		$found     = false;
+		$row       = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
 
 		$table = $wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_AUTH_CODES;
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE code = %s", $code ) );
+		if ( ! $found ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE code = %s", $code ) );
+			wp_cache_set( $cache_key, $row, self::CACHE_GROUP, 60 );
+		}
 
 		if ( ! $row ) {
 			return new WP_Error( 'invalid_grant', 'Authorization code not found.' );
@@ -264,6 +292,7 @@ class KEYSTONE_OIDC_Token_Manager {
 
 		// Always delete the code immediately (single use).
 		$wpdb->delete( $table, array( 'code' => $code ), array( '%s' ) );
+		wp_cache_delete( $cache_key, self::CACHE_GROUP );
 
 		if ( strtotime( $row->expires_at ) < time() ) {
 			return new WP_Error( 'invalid_grant', 'Authorization code has expired.' );
@@ -377,6 +406,7 @@ class KEYSTONE_OIDC_Token_Manager {
 	 */
 	private static function store_token_record( $hash, $client_id, $user_id, $scope, $token_type, $expires ) {
 		global $wpdb;
+		$expires_at = gmdate( 'Y-m-d H:i:s', $expires );
 		$wpdb->insert(
 			$wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_TOKENS,
 			array(
@@ -385,10 +415,21 @@ class KEYSTONE_OIDC_Token_Manager {
 				'user_id'    => $user_id,
 				'scope'      => $scope,
 				'token_type' => $token_type,
-				'expires_at' => gmdate( 'Y-m-d H:i:s', $expires ),
+				'expires_at' => $expires_at,
 			),
 			array( '%s', '%s', '%d', '%s', '%s', '%s' )
 		);
+
+		$record = (object) array(
+			'token_hash' => $hash,
+			'client_id'  => $client_id,
+			'user_id'    => $user_id,
+			'scope'      => $scope,
+			'token_type' => $token_type,
+			'expires_at' => $expires_at,
+			'revoked'    => 0,
+		);
+		wp_cache_set( self::token_cache_key( $token_type, $hash ), $record, self::CACHE_GROUP, 300 );
 	}
 
 	/**
@@ -407,9 +448,15 @@ class KEYSTONE_OIDC_Token_Manager {
 
 		// Check revocation.
 		$hash  = hash( 'sha256', $access_token );
-		$table = $wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_TOKENS;
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$record = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE token_hash = %s AND token_type = 'access'", $hash ) );
+		$cache_key = self::token_cache_key( 'access', $hash );
+		$found     = false;
+		$record    = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
+		if ( ! $found ) {
+			$table = $wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_TOKENS;
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$record = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE token_hash = %s AND token_type = 'access'", $hash ) );
+			wp_cache_set( $cache_key, $record, self::CACHE_GROUP, 300 );
+		}
 
 		if ( ! $record ) {
 			return new WP_Error( 'invalid_token', 'Token not found.' );
@@ -432,10 +479,15 @@ class KEYSTONE_OIDC_Token_Manager {
 		global $wpdb;
 
 		$hash  = hash( 'sha256', $refresh_token );
+		$cache_key = self::token_cache_key( 'refresh', $hash );
+		$found     = false;
+		$record    = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
 		$table = $wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_TOKENS;
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$record = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE token_hash = %s AND token_type = 'refresh'", $hash ) );
+		if ( ! $found ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$record = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE token_hash = %s AND token_type = 'refresh'", $hash ) );
+			wp_cache_set( $cache_key, $record, self::CACHE_GROUP, 300 );
+		}
 
 		if ( ! $record ) {
 			return new WP_Error( 'invalid_grant', 'Refresh token not found.' );
@@ -452,6 +504,10 @@ class KEYSTONE_OIDC_Token_Manager {
 
 		// Revoke old refresh token.
 		$wpdb->update( $table, array( 'revoked' => 1 ), array( 'token_hash' => $hash ), array( '%d' ), array( '%s' ) );
+		if ( $record ) {
+			$record->revoked = 1;
+			wp_cache_set( $cache_key, $record, self::CACHE_GROUP, 60 );
+		}
 
 		return self::issue_tokens( $client_id, $record->user_id, $record->scope );
 	}
