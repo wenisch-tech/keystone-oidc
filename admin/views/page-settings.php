@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Admin view: Settings page
  */

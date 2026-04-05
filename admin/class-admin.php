@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * OIDC Provider Admin
  *

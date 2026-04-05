@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Admin view: Clients list page
  *
