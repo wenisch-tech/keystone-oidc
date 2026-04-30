@@ -99,6 +99,16 @@ class KEYSTONE_OIDC_Admin {
 		}
 
 		wp_enqueue_style( 'keystone-oidc-admin', KEYSTONE_OIDC_PLUGIN_URL . 'admin/css/admin.css', array(), KEYSTONE_OIDC_VERSION );
+
+		wp_register_script( 'keystone-oidc-admin', KEYSTONE_OIDC_PLUGIN_URL . 'admin/js/keystone-oidc-admin.js', array(), KEYSTONE_OIDC_VERSION, true );
+		wp_localize_script(
+			'keystone-oidc-admin',
+			'keystoneOidc',
+			array(
+				'copied' => __( 'Copied!', 'keystone-oidc' ),
+			)
+		);
+		wp_enqueue_script( 'keystone-oidc-admin' );
 	}
 
 	// -------------------------------------------------------------------------

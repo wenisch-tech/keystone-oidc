@@ -44,6 +44,7 @@ jobs:
           rsync -a \
             --exclude='.git' \
             --exclude='.github' \
+            --exclude='.assets' \
             --exclude='.gitignore' \
             --exclude='docs' \
             --exclude='*.zip' \

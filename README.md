@@ -3,7 +3,7 @@
 [![Release](https://github.com/wenisch-tech/keystone-oidc/actions/workflows/ci.yml/badge.svg)](https://github.com/wenisch-tech/keystone-oidc/actions/workflows/ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/wenisch-tech/keystone-oidc?label=release)](https://github.com/wenisch-tech/keystone-oidc/releases/latest)
 
-![Keystone OIDC](assets/banner-1544x500.png)
+![Keystone OIDC](.assets/banner-1544x500.png)
 
 > Turn your WordPress site into a fully featured **OpenID Connect (OIDC) identity provider**.
 

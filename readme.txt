@@ -1,5 +1,5 @@
 ﻿=== Keystone OIDC ===
-Contributors: wenisch-tech
+Contributors: jfwenisch
 Tags: oidc, openid-connect, sso, authentication, oauth2
 Requires at least: 5.6
 Tested up to: 6.9

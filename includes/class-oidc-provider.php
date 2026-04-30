@@ -37,7 +37,17 @@ class KEYSTONE_OIDC_Provider {
 		add_action( 'init', array( $this, 'register_rewrite_rules' ) );
 		add_filter( 'query_vars', array( $this, 'add_query_vars' ) );
 		add_action( 'template_redirect', array( $this, 'handle_request' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue_consent_assets' ) );
 		add_action( 'wp_scheduled_delete', array( 'KEYSTONE_OIDC_Token_Manager', 'cleanup_expired' ) );
+	}
+
+	/**
+	 * Enqueue the consent page stylesheet when on the authorize endpoint.
+	 */
+	public function maybe_enqueue_consent_assets() {
+		if ( 'authorize' === get_query_var( 'oidc_endpoint' ) ) {
+			wp_enqueue_style( 'keystone-oidc-consent', KEYSTONE_OIDC_PLUGIN_URL . 'includes/css/consent.css', array(), KEYSTONE_OIDC_VERSION );
+		}
 	}
 
 	/**
