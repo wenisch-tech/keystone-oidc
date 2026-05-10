@@ -121,9 +121,9 @@ class KEYSTONE_OIDC_Admin {
 		}
 
 		// Handle edit sub-page.
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$client_id = isset( $_GET['client_id'] ) ? sanitize_text_field( wp_unslash( $_GET['client_id'] ) ) : '';
 		if ( $client_id ) {
+			check_admin_referer( 'keystone_oidc_view_client' );
 			$client = KEYSTONE_OIDC_Client_Manager::get_client( $client_id );
 			if ( $client ) {
 				include KEYSTONE_OIDC_PLUGIN_DIR . 'admin/views/page-client-edit.php';
