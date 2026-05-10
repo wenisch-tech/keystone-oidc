@@ -203,7 +203,19 @@ class KEYSTONE_OIDC_Provider {
 
 		// Require user to be logged in.
 		if ( ! is_user_logged_in() ) {
-			$authorize_url = add_query_arg( $_GET, self::get_endpoint_url( 'oauth/authorize' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- OAuth2 redirect; `state` param is the CSRF mechanism (RFC 6749 §10.12).
+			$authorize_params = array_filter(
+				array(
+					'response_type'         => $response_type,
+					'client_id'             => $client_id,
+					'redirect_uri'          => $redirect_uri,
+					'scope'                 => $scope,
+					'state'                 => $state,
+					'nonce'                 => $nonce,
+					'code_challenge'        => $code_challenge,
+					'code_challenge_method' => $code_challenge_method,
+				)
+			);
+			$authorize_url = add_query_arg( $authorize_params, self::get_endpoint_url( 'oauth/authorize' ) );
 			wp_safe_redirect( wp_login_url( $authorize_url ) );
 			exit;
 		}
