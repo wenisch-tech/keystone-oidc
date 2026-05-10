@@ -161,6 +161,12 @@ class KEYSTONE_OIDC_Provider {
 	// -------------------------------------------------------------------------
 
 	private function handle_authorize() {
+		// OAuth2 Authorization Endpoint (RFC 6749 §4.1.1). This request is initiated by an
+		// external OAuth client via a browser redirect. CSRF protection for this endpoint is
+		// provided by the `state` parameter as mandated by RFC 6749 §10.12
+		// (https://datatracker.ietf.org/doc/html/rfc6749#section-10.12). WordPress nonces are
+		// not applicable here: the request originates from an external client that has no
+		// WordPress session and therefore cannot supply a WP nonce.
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$response_type         = isset( $_GET['response_type'] ) ? sanitize_text_field( wp_unslash( $_GET['response_type'] ) ) : '';
 		$client_id             = isset( $_GET['client_id'] ) ? sanitize_text_field( wp_unslash( $_GET['client_id'] ) ) : '';
@@ -197,7 +203,7 @@ class KEYSTONE_OIDC_Provider {
 
 		// Require user to be logged in.
 		if ( ! is_user_logged_in() ) {
-			$authorize_url = add_query_arg( $_GET, self::get_endpoint_url( 'oauth/authorize' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$authorize_url = add_query_arg( $_GET, self::get_endpoint_url( 'oauth/authorize' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- OAuth2 redirect; `state` param is the CSRF mechanism (RFC 6749 §10.12).
 			wp_safe_redirect( wp_login_url( $authorize_url ) );
 			exit;
 		}
@@ -213,11 +219,18 @@ class KEYSTONE_OIDC_Provider {
 	}
 
 	private function handle_authorize_post( $client_id, $redirect_uri, $scope, $state, $nonce, $code_challenge, $code_challenge_method ) {
-		check_admin_referer( 'oidc_authorize' );
+		// Verify the WP nonce emitted by wp_nonce_field( 'oidc_authorize' ) in consent.php.
+		// wp_verify_nonce() is used here instead of check_admin_referer() because this is a
+		// public frontend form — check_admin_referer() validates the HTTP Referer header against
+		// admin_url(), which always fails for frontend pages and is not appropriate outside the
+		// WP admin area. See https://developer.wordpress.org/reference/functions/wp_verify_nonce/
+		$nonce_value = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+		if ( ! wp_verify_nonce( $nonce_value, 'oidc_authorize' ) ) {
+			wp_die( esc_html__( 'Security check failed.', 'keystone-oidc' ) );
+		}
 
 		$user_id = get_current_user_id();
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['authorize'] ) && 'deny' === sanitize_text_field( wp_unslash( $_POST['authorize'] ) ) ) {
 			$this->redirect_with_error( $redirect_uri, 'access_denied', 'User denied authorization.', $state );
 			return;
@@ -272,6 +285,11 @@ class KEYSTONE_OIDC_Provider {
 			}
 		}
 
+		// OAuth2 Token Endpoint (RFC 6749 §4.1.3 — https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3).
+		// This is a direct machine-to-machine POST by an external OAuth client — there is no browser
+		// session on this request. Authentication is performed via client credentials (client_id +
+		// client_secret via HTTP Basic auth or POST body) or PKCE code_verifier (RFC 7636 —
+		// https://datatracker.ietf.org/doc/html/rfc7636). WordPress nonces are not applicable here.
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( ! $client_id ) {
 			$client_id     = isset( $_POST['client_id'] ) ? sanitize_text_field( wp_unslash( $_POST['client_id'] ) ) : '';
@@ -368,6 +386,11 @@ class KEYSTONE_OIDC_Provider {
 		}
 
 		if ( ! $access_token ) {
+			// OIDC UserInfo Endpoint (OIDC Core §5.3 — https://openid.net/specs/openid-connect-core-1_0.html#UserInfo).
+			// Bearer token in the Authorization header is the primary auth mechanism (RFC 6750 —
+			// https://datatracker.ietf.org/doc/html/rfc6750). The query-string fallback is for clients
+			// that cannot set headers. Either way, this is a direct API call with no browser session;
+			// WordPress nonces are not applicable here.
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$access_token = isset( $_GET['access_token'] ) ? sanitize_text_field( wp_unslash( $_GET['access_token'] ) ) : '';
 		}

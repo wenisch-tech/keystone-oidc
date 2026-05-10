@@ -62,7 +62,7 @@ $keystone_oidc_deleted = isset( $_GET['deleted'] ) && '1' === $_GET['deleted'];
 					<tr>
 						<td class="column-name">
 							<strong>
-								<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-oidc-clients&client_id=' . urlencode( $keystone_oidc_client_row->client_id ) ) ); ?>">
+							<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wp-oidc-clients&client_id=' . urlencode( $keystone_oidc_client_row->client_id ) ), 'keystone_oidc_view_client' ) ); ?>">
 									<?php echo esc_html( $keystone_oidc_client_row->client_name ); ?>
 								</a>
 							</strong>
@@ -82,7 +82,7 @@ $keystone_oidc_deleted = isset( $_GET['deleted'] ) && '1' === $_GET['deleted'];
 							<?php echo esc_html( wp_date( get_option( 'date_format' ), strtotime( $keystone_oidc_client_row->created_at ) ) ); ?>
 						</td>
 						<td class="column-actions">
-							<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-oidc-clients&client_id=' . urlencode( $keystone_oidc_client_row->client_id ) ) ); ?>" class="button button-small">
+							<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wp-oidc-clients&client_id=' . urlencode( $keystone_oidc_client_row->client_id ) ), 'keystone_oidc_view_client' ) ); ?>" class="button button-small">
 								<?php esc_html_e( 'Edit', 'keystone-oidc' ); ?>
 							</a>
 						</td>
