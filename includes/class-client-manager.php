@@ -105,7 +105,7 @@ class KEYSTONE_OIDC_Client_Manager {
 	 */
 	public static function drop_tables() {
 		global $wpdb;
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
 		$wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . self::TABLE_TOKENS );
 		$wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . self::TABLE_AUTH_CODES );
 		$wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . self::TABLE_CLIENTS );
@@ -168,6 +168,7 @@ class KEYSTONE_OIDC_Client_Manager {
 		$hashed_secret = self::hash_secret( $plain_secret );
 		$client_id = self::generate_client_id();
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$result = $wpdb->insert(
 			$wpdb->prefix . self::TABLE_CLIENTS,
 			array(
@@ -204,6 +205,7 @@ class KEYSTONE_OIDC_Client_Manager {
 	public static function update_client( $client_id, $name, array $redirect_uris, $allowed_scopes ) {
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$result = $wpdb->update(
 			$wpdb->prefix . self::TABLE_CLIENTS,
 			array(
@@ -237,6 +239,7 @@ class KEYSTONE_OIDC_Client_Manager {
 		$plain_secret  = self::generate_secret_plain();
 		$hashed_secret = self::hash_secret( $plain_secret );
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$result = $wpdb->update(
 			$wpdb->prefix . self::TABLE_CLIENTS,
 			array( 'client_secret' => $hashed_secret ),
@@ -263,9 +266,11 @@ class KEYSTONE_OIDC_Client_Manager {
 	public static function delete_client( $client_id ) {
 		global $wpdb;
 
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->delete( $wpdb->prefix . self::TABLE_AUTH_CODES, array( 'client_id' => $client_id ), array( '%s' ) );
 		$wpdb->delete( $wpdb->prefix . self::TABLE_TOKENS, array( 'client_id' => $client_id ), array( '%s' ) );
 		$result = $wpdb->delete( $wpdb->prefix . self::TABLE_CLIENTS, array( 'client_id' => $client_id ), array( '%s' ) );
+		// phpcs:enable
 
 		self::invalidate_client_cache( $client_id );
 
@@ -289,7 +294,7 @@ class KEYSTONE_OIDC_Client_Manager {
 		}
 
 		$table = $wpdb->prefix . self::TABLE_CLIENTS;
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$client = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE client_id = %s", $client_id ) );
 
 		wp_cache_set( $cache_key, $client, self::CACHE_GROUP, 300 );
@@ -312,7 +317,7 @@ class KEYSTONE_OIDC_Client_Manager {
 		}
 
 		$table = $wpdb->prefix . self::TABLE_CLIENTS;
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$clients = $wpdb->get_results( "SELECT * FROM {$table} ORDER BY created_at DESC" );
 
 		wp_cache_set( self::CACHE_ALL_CLIENTS, $clients, self::CACHE_GROUP, 300 );
