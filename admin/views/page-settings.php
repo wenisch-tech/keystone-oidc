@@ -43,15 +43,15 @@ $keystone_oidc_kid    = KEYSTONE_OIDC_Token_Manager::get_key_id();
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'Authorization Endpoint', 'keystone-oidc' ); ?></th>
-				<td><code><?php echo esc_html( KEYSTONE_OIDC_Provider::get_endpoint_url( 'oauth/authorize' ) ); ?></code></td>
+				<td><code><?php echo esc_html( rest_url( 'keystone-oidc/v1/authorize' ) ); ?></code></td>
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'Token Endpoint', 'keystone-oidc' ); ?></th>
-				<td><code><?php echo esc_html( KEYSTONE_OIDC_Provider::get_endpoint_url( 'oauth/token' ) ); ?></code></td>
+				<td><code><?php echo esc_html( rest_url( 'keystone-oidc/v1/token' ) ); ?></code></td>
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'UserInfo Endpoint', 'keystone-oidc' ); ?></th>
-				<td><code><?php echo esc_html( KEYSTONE_OIDC_Provider::get_endpoint_url( 'oauth/userinfo' ) ); ?></code></td>
+				<td><code><?php echo esc_html( rest_url( 'keystone-oidc/v1/userinfo' ) ); ?></code></td>
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'JWKS URI', 'keystone-oidc' ); ?></th>
