@@ -120,11 +120,11 @@ class KEYSTONE_OIDC_Admin {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'keystone-oidc' ) );
 		}
 
-		// Handle edit sub-page.
-		$client_id = isset( $_GET['client_id'] ) ? sanitize_text_field( wp_unslash( $_GET['client_id'] ) ) : '';
-		if ( $client_id ) {
+		// Handle edit sub-page. Nonce is verified before reading the parameter.
+		if ( isset( $_GET['client_id'] ) ) {
 			check_admin_referer( 'keystone_oidc_view_client' );
-			$client = KEYSTONE_OIDC_Client_Manager::get_client( $client_id );
+			$client_id = sanitize_text_field( wp_unslash( $_GET['client_id'] ) );
+			$client    = KEYSTONE_OIDC_Client_Manager::get_client( $client_id );
 			if ( $client ) {
 				include KEYSTONE_OIDC_PLUGIN_DIR . 'admin/views/page-client-edit.php';
 				return;
