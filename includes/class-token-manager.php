@@ -245,6 +245,7 @@ class KEYSTONE_OIDC_Token_Manager {
 		$code       = bin2hex( random_bytes( 32 ) );
 		$expires_at = gmdate( 'Y-m-d H:i:s', time() + self::AUTH_CODE_LIFETIME );
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$wpdb->insert(
 			$wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_AUTH_CODES,
 			array(
@@ -281,7 +282,7 @@ class KEYSTONE_OIDC_Token_Manager {
 
 		$table = $wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_AUTH_CODES;
 		if ( ! $found ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE code = %s", $code ) );
 			wp_cache_set( $cache_key, $row, self::CACHE_GROUP, 60 );
 		}
@@ -291,6 +292,7 @@ class KEYSTONE_OIDC_Token_Manager {
 		}
 
 		// Always delete the code immediately (single use).
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$wpdb->delete( $table, array( 'code' => $code ), array( '%s' ) );
 		wp_cache_delete( $cache_key, self::CACHE_GROUP );
 
@@ -407,6 +409,7 @@ class KEYSTONE_OIDC_Token_Manager {
 	private static function store_token_record( $hash, $client_id, $user_id, $scope, $token_type, $expires ) {
 		global $wpdb;
 		$expires_at = gmdate( 'Y-m-d H:i:s', $expires );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$wpdb->insert(
 			$wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_TOKENS,
 			array(
@@ -453,7 +456,7 @@ class KEYSTONE_OIDC_Token_Manager {
 		$record    = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
 		if ( ! $found ) {
 			$table = $wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_TOKENS;
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$record = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE token_hash = %s AND token_type = 'access'", $hash ) );
 			wp_cache_set( $cache_key, $record, self::CACHE_GROUP, 300 );
 		}
@@ -484,7 +487,7 @@ class KEYSTONE_OIDC_Token_Manager {
 		$record    = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
 		$table = $wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_TOKENS;
 		if ( ! $found ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$record = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE token_hash = %s AND token_type = 'refresh'", $hash ) );
 			wp_cache_set( $cache_key, $record, self::CACHE_GROUP, 300 );
 		}
@@ -503,6 +506,7 @@ class KEYSTONE_OIDC_Token_Manager {
 		}
 
 		// Revoke old refresh token.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update( $table, array( 'revoked' => 1 ), array( 'token_hash' => $hash ), array( '%d' ), array( '%s' ) );
 		if ( $record ) {
 			$record->revoked = 1;
@@ -531,7 +535,7 @@ class KEYSTONE_OIDC_Token_Manager {
 		$auth_table  = $wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_AUTH_CODES;
 		$token_table = $wpdb->prefix . KEYSTONE_OIDC_Client_Manager::TABLE_TOKENS;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$auth_table} WHERE expires_at < %s", $now ) );
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$token_table} WHERE expires_at < %s AND revoked = 1", $now ) );
 		// phpcs:enable
