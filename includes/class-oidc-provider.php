@@ -408,6 +408,7 @@ class KEYSTONE_OIDC_Provider {
 			'email'   => __( 'Access your email address', 'keystone-oidc' ),
 		);
 		$requested_scopes = explode( ' ', $scope );
+		wp_enqueue_style( 'keystone-oidc-consent', KEYSTONE_OIDC_PLUGIN_URL . 'includes/css/consent.css', array(), KEYSTONE_OIDC_VERSION );
 		// Build the form action URL: POST back to the REST authorize endpoint with
 		// the same OAuth2 parameters so the handler can reconstruct the full context.
 		$authorize_url = add_query_arg(

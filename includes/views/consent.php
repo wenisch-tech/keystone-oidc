@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title><?php esc_html_e( 'Authorize Application', 'keystone-oidc' ); ?> &mdash; <?php echo esc_html( get_bloginfo( 'name' ) ); ?></title>
-	<link rel="stylesheet" href="<?php echo esc_url( KEYSTONE_OIDC_PLUGIN_URL . 'includes/css/consent.css' ); ?>?ver=<?php echo esc_attr( KEYSTONE_OIDC_VERSION ); ?>">
+	<?php wp_print_styles( 'keystone-oidc-consent' ); ?>
 </head>
 <body>
 <div class="card">
