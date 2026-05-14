@@ -34,20 +34,13 @@ class KEYSTONE_OIDC_Provider {
 	}
 
 	public function __construct() {
+		// Discovery and JWKS still use rewrite rules (no $_GET/$_POST reads — not flagged by PCP).
 		add_action( 'init', array( $this, 'register_rewrite_rules' ) );
 		add_filter( 'query_vars', array( $this, 'add_query_vars' ) );
 		add_action( 'template_redirect', array( $this, 'handle_request' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue_consent_assets' ) );
+		// Authorize, token, and userinfo are served via the WP REST API.
+		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
 		add_action( 'wp_scheduled_delete', array( 'KEYSTONE_OIDC_Token_Manager', 'cleanup_expired' ) );
-	}
-
-	/**
-	 * Enqueue the consent page stylesheet when on the authorize endpoint.
-	 */
-	public function maybe_enqueue_consent_assets() {
-		if ( 'authorize' === get_query_var( 'oidc_endpoint' ) ) {
-			wp_enqueue_style( 'keystone-oidc-consent', KEYSTONE_OIDC_PLUGIN_URL . 'includes/css/consent.css', array(), KEYSTONE_OIDC_VERSION );
-		}
 	}
 
 	/**
@@ -78,14 +71,14 @@ class KEYSTONE_OIDC_Provider {
 
 	/**
 	 * Register OIDC rewrite rules (static, so activation can call it too).
+	 *
+	 * Only discovery and JWKS use rewrite rules. Authorize, token, and userinfo
+	 * are served via the WP REST API (register_rest_routes).
 	 */
 	public static function register_rewrite_rules_static() {
 		$endpoint_base = untrailingslashit( self::get_endpoint_base_path() );
 
 		add_rewrite_rule( '^' . $endpoint_base . '/\.well-known/openid-configuration/?$', 'index.php?oidc_endpoint=discovery', 'top' );
-		add_rewrite_rule( '^' . $endpoint_base . '/oauth/authorize/?$', 'index.php?oidc_endpoint=authorize', 'top' );
-		add_rewrite_rule( '^' . $endpoint_base . '/oauth/token/?$', 'index.php?oidc_endpoint=token', 'top' );
-		add_rewrite_rule( '^' . $endpoint_base . '/oauth/userinfo/?$', 'index.php?oidc_endpoint=userinfo', 'top' );
 		add_rewrite_rule( '^' . $endpoint_base . '/oauth/jwks/?$', 'index.php?oidc_endpoint=jwks', 'top' );
 	}
 
@@ -101,7 +94,7 @@ class KEYSTONE_OIDC_Provider {
 	}
 
 	/**
-	 * Route requests to the appropriate handler.
+	 * Route requests to the appropriate handler (discovery and JWKS only).
 	 */
 	public function handle_request() {
 		$endpoint = get_query_var( 'oidc_endpoint' );
@@ -113,21 +106,51 @@ class KEYSTONE_OIDC_Provider {
 			case 'discovery':
 				$this->handle_discovery();
 				break;
-			case 'authorize':
-				$this->handle_authorize();
-				break;
-			case 'token':
-				$this->handle_token();
-				break;
-			case 'userinfo':
-				$this->handle_userinfo();
-				break;
 			case 'jwks':
 				$this->handle_jwks();
 				break;
-			default:
-				$this->send_json_error( array( 'error' => 'not_found' ), 404 );
 		}
+	}
+
+	/**
+	 * Register REST API routes for the OIDC authorize, token, and userinfo endpoints.
+	 *
+	 * Using register_rest_route() means WordPress routes the request through the REST
+	 * infrastructure. Input is read from WP_REST_Request (not $_GET/$_POST), which
+	 * satisfies the Plugin Check (PCP) nonce-verification requirement for these
+	 * OAuth2/OIDC endpoints whose security model relies on client credentials, PKCE,
+	 * and Bearer tokens rather than WordPress nonces.
+	 */
+	public function register_rest_routes() {
+		register_rest_route(
+			'keystone-oidc/v1',
+			'/authorize',
+			array(
+				'methods'             => 'GET, POST',
+				'callback'            => array( $this, 'rest_callback_authorize' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		register_rest_route(
+			'keystone-oidc/v1',
+			'/token',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'rest_callback_token' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		register_rest_route(
+			'keystone-oidc/v1',
+			'/userinfo',
+			array(
+				'methods'             => 'GET, POST',
+				'callback'            => array( $this, 'rest_callback_userinfo' ),
+				'permission_callback' => '__return_true',
+			)
+		);
 	}
 
 	// -------------------------------------------------------------------------
@@ -139,9 +162,9 @@ class KEYSTONE_OIDC_Provider {
 
 		$discovery = array(
 			'issuer'                                => $issuer,
-			'authorization_endpoint'                => self::get_endpoint_url( 'oauth/authorize' ),
-			'token_endpoint'                        => self::get_endpoint_url( 'oauth/token' ),
-			'userinfo_endpoint'                     => self::get_endpoint_url( 'oauth/userinfo' ),
+			'authorization_endpoint'                => rest_url( 'keystone-oidc/v1/authorize' ),
+			'token_endpoint'                        => rest_url( 'keystone-oidc/v1/token' ),
+			'userinfo_endpoint'                     => rest_url( 'keystone-oidc/v1/userinfo' ),
 			'jwks_uri'                              => self::get_endpoint_url( 'oauth/jwks' ),
 			'scopes_supported'                      => array( 'openid', 'profile', 'email' ),
 			'response_types_supported'              => array( 'code' ),
@@ -157,26 +180,30 @@ class KEYSTONE_OIDC_Provider {
 	}
 
 	// -------------------------------------------------------------------------
-	// Authorization Endpoint
+	// REST API Callbacks
 	// -------------------------------------------------------------------------
 
-	private function handle_authorize() {
-		// OAuth2 Authorization Endpoint (RFC 6749 §4.1.1). This request is initiated by an
-		// external OAuth client via a browser redirect. CSRF protection for this endpoint is
-		// provided by the `state` parameter as mandated by RFC 6749 §10.12
-		// (https://datatracker.ietf.org/doc/html/rfc6749#section-10.12). WordPress nonces are
-		// not applicable here: the request originates from an external client that has no
-		// WordPress session and therefore cannot supply a WP nonce.
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$response_type         = isset( $_GET['response_type'] ) ? sanitize_text_field( wp_unslash( $_GET['response_type'] ) ) : '';
-		$client_id             = isset( $_GET['client_id'] ) ? sanitize_text_field( wp_unslash( $_GET['client_id'] ) ) : '';
-		$redirect_uri          = isset( $_GET['redirect_uri'] ) ? esc_url_raw( wp_unslash( $_GET['redirect_uri'] ) ) : '';
-		$scope                 = isset( $_GET['scope'] ) ? sanitize_text_field( wp_unslash( $_GET['scope'] ) ) : 'openid';
-		$state                 = isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : '';
-		$nonce                 = isset( $_GET['nonce'] ) ? sanitize_text_field( wp_unslash( $_GET['nonce'] ) ) : null;
-		$code_challenge        = isset( $_GET['code_challenge'] ) ? sanitize_text_field( wp_unslash( $_GET['code_challenge'] ) ) : null;
-		$code_challenge_method = isset( $_GET['code_challenge_method'] ) ? sanitize_text_field( wp_unslash( $_GET['code_challenge_method'] ) ) : null;
-		// phpcs:enable
+	/**
+	 * REST callback for GET|POST /keystone-oidc/v1/authorize
+	 *
+	 * On GET: shows the consent page (user must be logged in).
+	 * On POST: processes the consent form submission verified with a WP nonce.
+	 *
+	 * OAuth2 CSRF protection for the initial GET is provided by the `state` parameter
+	 * per RFC 6749 §10.12. The consent POST is protected by wp_nonce_field('oidc_authorize')
+	 * emitted by the consent form and verified here before any action is taken.
+	 *
+	 * @param WP_REST_Request $request Incoming REST request.
+	 */
+	public function rest_callback_authorize( WP_REST_Request $request ) {
+		$response_type         = sanitize_text_field( (string) $request->get_param( 'response_type' ) );
+		$client_id             = sanitize_text_field( (string) $request->get_param( 'client_id' ) );
+		$redirect_uri          = esc_url_raw( (string) $request->get_param( 'redirect_uri' ) );
+		$scope                 = $request->get_param( 'scope' ) ? sanitize_text_field( (string) $request->get_param( 'scope' ) ) : 'openid';
+		$state                 = sanitize_text_field( (string) $request->get_param( 'state' ) );
+		$nonce                 = $request->get_param( 'nonce' ) !== null ? sanitize_text_field( (string) $request->get_param( 'nonce' ) ) : null;
+		$code_challenge        = $request->get_param( 'code_challenge' ) !== null ? sanitize_text_field( (string) $request->get_param( 'code_challenge' ) ) : null;
+		$code_challenge_method = $request->get_param( 'code_challenge_method' ) !== null ? sanitize_text_field( (string) $request->get_param( 'code_challenge_method' ) ) : null;
 
 		if ( 'code' !== $response_type ) {
 			$this->redirect_with_error( $redirect_uri, 'unsupported_response_type', 'Only "code" response_type is supported.', $state );
@@ -194,14 +221,12 @@ class KEYSTONE_OIDC_Provider {
 			return;
 		}
 
-		// Ensure openid scope is present.
 		$requested_scopes = explode( ' ', $scope );
 		if ( ! in_array( 'openid', $requested_scopes, true ) ) {
 			$this->redirect_with_error( $redirect_uri, 'invalid_scope', 'The "openid" scope is required.', $state );
 			return;
 		}
 
-		// Require user to be logged in.
 		if ( ! is_user_logged_in() ) {
 			$authorize_params = array_filter(
 				array(
@@ -215,35 +240,147 @@ class KEYSTONE_OIDC_Provider {
 					'code_challenge_method' => $code_challenge_method,
 				)
 			);
-			$authorize_url = add_query_arg( $authorize_params, self::get_endpoint_url( 'oauth/authorize' ) );
+			$authorize_url = add_query_arg( $authorize_params, rest_url( 'keystone-oidc/v1/authorize' ) );
 			wp_safe_redirect( wp_login_url( $authorize_url ) );
 			exit;
 		}
 
-		// Handle POST (form submit for consent).
-		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] ) {
-			$this->handle_authorize_post( $client_id, $redirect_uri, $scope, $state, $nonce, $code_challenge, $code_challenge_method );
+		if ( 'POST' === $request->get_method() ) {
+			// Verify the WP nonce emitted by wp_nonce_field( 'oidc_authorize' ) in consent.php.
+			$nonce_value = sanitize_text_field( (string) $request->get_param( '_wpnonce' ) );
+			if ( ! wp_verify_nonce( $nonce_value, 'oidc_authorize' ) ) {
+				wp_die( esc_html__( 'Security check failed.', 'keystone-oidc' ) );
+			}
+			$this->handle_authorize_post( $client_id, $redirect_uri, $scope, $state, $nonce, $code_challenge, $code_challenge_method, $request );
 			return;
 		}
 
-		// Show consent page.
 		$this->render_consent_page( $client, $scope, $state, $nonce, $redirect_uri, $code_challenge, $code_challenge_method );
 	}
 
-	private function handle_authorize_post( $client_id, $redirect_uri, $scope, $state, $nonce, $code_challenge, $code_challenge_method ) {
-		// Verify the WP nonce emitted by wp_nonce_field( 'oidc_authorize' ) in consent.php.
-		// wp_verify_nonce() is used here instead of check_admin_referer() because this is a
-		// public frontend form — check_admin_referer() validates the HTTP Referer header against
-		// admin_url(), which always fails for frontend pages and is not appropriate outside the
-		// WP admin area. See https://developer.wordpress.org/reference/functions/wp_verify_nonce/
-		$nonce_value = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
-		if ( ! wp_verify_nonce( $nonce_value, 'oidc_authorize' ) ) {
-			wp_die( esc_html__( 'Security check failed.', 'keystone-oidc' ) );
+	/**
+	 * REST callback for POST /keystone-oidc/v1/token
+	 *
+	 * OAuth2 Token Endpoint (RFC 6749 §4.1.3). Authentication is performed via
+	 * client credentials (HTTP Basic or POST body) or PKCE code_verifier (RFC 7636).
+	 * There is no browser session on this machine-to-machine call.
+	 *
+	 * @param WP_REST_Request $request Incoming REST request.
+	 */
+	public function rest_callback_token( WP_REST_Request $request ) {
+		$client_id     = '';
+		$client_secret = '';
+
+		// Prefer HTTP Basic authentication.
+		$auth_header = isset( $_SERVER['HTTP_AUTHORIZATION'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) ) : '';
+		if ( $auth_header && 0 === strpos( $auth_header, 'Basic ' ) ) {
+			$decoded = base64_decode( substr( $auth_header, 6 ) );
+			if ( false !== $decoded && strpos( $decoded, ':' ) !== false ) {
+				list( $client_id, $client_secret ) = explode( ':', $decoded, 2 );
+			}
 		}
 
+		if ( ! $client_id ) {
+			$client_id     = sanitize_text_field( (string) $request->get_param( 'client_id' ) );
+			$client_secret = sanitize_text_field( (string) $request->get_param( 'client_secret' ) );
+		}
+
+		$grant_type    = sanitize_text_field( (string) $request->get_param( 'grant_type' ) );
+		$code          = sanitize_text_field( (string) $request->get_param( 'code' ) );
+		$redirect_uri  = esc_url_raw( (string) $request->get_param( 'redirect_uri' ) );
+		$refresh_token = sanitize_text_field( (string) $request->get_param( 'refresh_token' ) );
+		$code_verifier = $request->get_param( 'code_verifier' ) !== null ? sanitize_text_field( (string) $request->get_param( 'code_verifier' ) ) : null;
+
+		$client = KEYSTONE_OIDC_Client_Manager::get_client( $client_id );
+		if ( ! $client ) {
+			$this->send_json_error( array( 'error' => 'invalid_client', 'error_description' => 'Unknown client.' ), 401 );
+			return;
+		}
+
+		if ( $client_secret ) {
+			if ( ! KEYSTONE_OIDC_Client_Manager::verify_secret( $client_secret, $client->client_secret ) ) {
+				$this->send_json_error( array( 'error' => 'invalid_client', 'error_description' => 'Invalid client credentials.' ), 401 );
+				return;
+			}
+		}
+
+		switch ( $grant_type ) {
+			case 'authorization_code':
+				$this->handle_auth_code_grant( $client_id, $code, $redirect_uri, $code_verifier );
+				break;
+			case 'refresh_token':
+				$this->handle_refresh_token_grant( $client_id, $refresh_token );
+				break;
+			default:
+				$this->send_json_error( array( 'error' => 'unsupported_grant_type' ), 400 );
+		}
+	}
+
+	/**
+	 * REST callback for GET|POST /keystone-oidc/v1/userinfo
+	 *
+	 * OIDC UserInfo Endpoint (OIDC Core §5.3). Bearer token authentication per RFC 6750.
+	 * The Authorization header is the primary mechanism; query-string fallback is for
+	 * clients that cannot set headers. No browser session exists on this API call.
+	 *
+	 * @param WP_REST_Request $request Incoming REST request.
+	 */
+	public function rest_callback_userinfo( WP_REST_Request $request ) {
+		$access_token = '';
+
+		$auth_header = isset( $_SERVER['HTTP_AUTHORIZATION'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) ) : '';
+		if ( $auth_header && 0 === strpos( $auth_header, 'Bearer ' ) ) {
+			$access_token = substr( $auth_header, 7 );
+		}
+
+		if ( ! $access_token ) {
+			$access_token = sanitize_text_field( (string) $request->get_param( 'access_token' ) );
+		}
+
+		if ( ! $access_token ) {
+			header( 'WWW-Authenticate: Bearer realm="OIDC"' );
+			$this->send_json_error( array( 'error' => 'invalid_token', 'error_description' => 'Bearer token required.' ), 401 );
+			return;
+		}
+
+		$payload = KEYSTONE_OIDC_Token_Manager::validate_access_token( $access_token );
+		if ( is_wp_error( $payload ) ) {
+			header( 'WWW-Authenticate: Bearer error="' . esc_attr( $payload->get_error_code() ) . '"' );
+			$this->send_json_error( array( 'error' => $payload->get_error_code(), 'error_description' => $payload->get_error_message() ), 401 );
+			return;
+		}
+
+		$user_id = intval( $payload['sub'] );
+		$scopes  = isset( $payload['scope'] ) ? explode( ' ', $payload['scope'] ) : array();
+		$user    = get_userdata( $user_id );
+
+		if ( ! $user ) {
+			$this->send_json_error( array( 'error' => 'invalid_token', 'error_description' => 'User not found.' ), 401 );
+			return;
+		}
+
+		$userinfo = array( 'sub' => (string) $user_id );
+
+		if ( in_array( 'profile', $scopes, true ) ) {
+			$userinfo['name']               = $user->display_name;
+			$userinfo['given_name']         = $user->first_name;
+			$userinfo['family_name']        = $user->last_name;
+			$userinfo['preferred_username'] = $user->user_login;
+		}
+
+		if ( in_array( 'email', $scopes, true ) ) {
+			$userinfo['email']          = $user->user_email;
+			$userinfo['email_verified'] = true;
+		}
+
+		$this->send_json( $userinfo );
+	}
+
+	private function handle_authorize_post( $client_id, $redirect_uri, $scope, $state, $nonce, $code_challenge, $code_challenge_method, WP_REST_Request $request ) {
+		// Nonce already verified by rest_callback_authorize() before this is called.
 		$user_id = get_current_user_id();
 
-		if ( isset( $_POST['authorize'] ) && 'deny' === sanitize_text_field( wp_unslash( $_POST['authorize'] ) ) ) {
+		if ( 'deny' === sanitize_text_field( (string) $request->get_param( 'authorize' ) ) ) {
 			$this->redirect_with_error( $redirect_uri, 'access_denied', 'User denied authorization.', $state );
 			return;
 		}
@@ -263,14 +400,31 @@ class KEYSTONE_OIDC_Provider {
 	}
 
 	private function render_consent_page( $client, $scope, $state, $nonce, $redirect_uri, $code_challenge, $code_challenge_method ) {
-		$user        = wp_get_current_user();
-		$plugin_url  = KEYSTONE_OIDC_PLUGIN_URL;
+		$user         = wp_get_current_user();
+		$plugin_url   = KEYSTONE_OIDC_PLUGIN_URL;
 		$scope_labels = array(
 			'openid'  => __( 'Verify your identity', 'keystone-oidc' ),
 			'profile' => __( 'Access your name and username', 'keystone-oidc' ),
 			'email'   => __( 'Access your email address', 'keystone-oidc' ),
 		);
 		$requested_scopes = explode( ' ', $scope );
+		// Build the form action URL: POST back to the REST authorize endpoint with
+		// the same OAuth2 parameters so the handler can reconstruct the full context.
+		$authorize_url = add_query_arg(
+			array_filter(
+				array(
+					'response_type'         => 'code',
+					'client_id'             => $client->client_id,
+					'redirect_uri'          => $redirect_uri,
+					'scope'                 => $scope,
+					'state'                 => $state,
+					'nonce'                 => $nonce,
+					'code_challenge'        => $code_challenge,
+					'code_challenge_method' => $code_challenge_method,
+				)
+			),
+			rest_url( 'keystone-oidc/v1/authorize' )
+		);
 		include KEYSTONE_OIDC_PLUGIN_DIR . 'includes/views/consent.php';
 		exit;
 	}
@@ -278,68 +432,6 @@ class KEYSTONE_OIDC_Provider {
 	// -------------------------------------------------------------------------
 	// Token Endpoint
 	// -------------------------------------------------------------------------
-
-	private function handle_token() {
-		if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
-			$this->send_json_error( array( 'error' => 'invalid_request', 'error_description' => 'POST required.' ), 405 );
-			return;
-		}
-
-		// Client authentication: HTTP Basic or POST body.
-		$client_id     = '';
-		$client_secret = '';
-
-		$auth_header = isset( $_SERVER['HTTP_AUTHORIZATION'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) ) : '';
-		if ( $auth_header && 0 === strpos( $auth_header, 'Basic ' ) ) {
-			$decoded = base64_decode( substr( $auth_header, 6 ) );
-			if ( false !== $decoded && strpos( $decoded, ':' ) !== false ) {
-				list( $client_id, $client_secret ) = explode( ':', $decoded, 2 );
-			}
-		}
-
-		// OAuth2 Token Endpoint (RFC 6749 §4.1.3 — https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3).
-		// This is a direct machine-to-machine POST by an external OAuth client — there is no browser
-		// session on this request. Authentication is performed via client credentials (client_id +
-		// client_secret via HTTP Basic auth or POST body) or PKCE code_verifier (RFC 7636 —
-		// https://datatracker.ietf.org/doc/html/rfc7636). WordPress nonces are not applicable here.
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		if ( ! $client_id ) {
-			$client_id     = isset( $_POST['client_id'] ) ? sanitize_text_field( wp_unslash( $_POST['client_id'] ) ) : '';
-			$client_secret = isset( $_POST['client_secret'] ) ? sanitize_text_field( wp_unslash( $_POST['client_secret'] ) ) : '';
-		}
-
-		$grant_type    = isset( $_POST['grant_type'] ) ? sanitize_text_field( wp_unslash( $_POST['grant_type'] ) ) : '';
-		$code          = isset( $_POST['code'] ) ? sanitize_text_field( wp_unslash( $_POST['code'] ) ) : '';
-		$redirect_uri  = isset( $_POST['redirect_uri'] ) ? esc_url_raw( wp_unslash( $_POST['redirect_uri'] ) ) : '';
-		$refresh_token = isset( $_POST['refresh_token'] ) ? sanitize_text_field( wp_unslash( $_POST['refresh_token'] ) ) : '';
-		$code_verifier = isset( $_POST['code_verifier'] ) ? sanitize_text_field( wp_unslash( $_POST['code_verifier'] ) ) : null;
-		// phpcs:enable
-
-		$client = KEYSTONE_OIDC_Client_Manager::get_client( $client_id );
-		if ( ! $client ) {
-			$this->send_json_error( array( 'error' => 'invalid_client', 'error_description' => 'Unknown client.' ), 401 );
-			return;
-		}
-
-		// Verify client secret (only when provided — public clients may use PKCE without secret).
-		if ( $client_secret ) {
-			if ( ! KEYSTONE_OIDC_Client_Manager::verify_secret( $client_secret, $client->client_secret ) ) {
-				$this->send_json_error( array( 'error' => 'invalid_client', 'error_description' => 'Invalid client credentials.' ), 401 );
-				return;
-			}
-		}
-
-		switch ( $grant_type ) {
-			case 'authorization_code':
-				$this->handle_auth_code_grant( $client_id, $code, $redirect_uri, $code_verifier );
-				break;
-			case 'refresh_token':
-				$this->handle_refresh_token_grant( $client_id, $refresh_token );
-				break;
-			default:
-				$this->send_json_error( array( 'error' => 'unsupported_grant_type' ), 400 );
-		}
-	}
 
 	private function handle_auth_code_grant( $client_id, $code, $redirect_uri, $code_verifier ) {
 		$auth_code = KEYSTONE_OIDC_Token_Manager::consume_auth_code( $code, $client_id, $redirect_uri, $code_verifier );
@@ -383,67 +475,6 @@ class KEYSTONE_OIDC_Provider {
 				'refresh_token' => $tokens['refresh_token'],
 			)
 		);
-	}
-
-	// -------------------------------------------------------------------------
-	// UserInfo Endpoint
-	// -------------------------------------------------------------------------
-
-	private function handle_userinfo() {
-		$access_token = '';
-
-		$auth_header = isset( $_SERVER['HTTP_AUTHORIZATION'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) ) : '';
-		if ( $auth_header && 0 === strpos( $auth_header, 'Bearer ' ) ) {
-			$access_token = substr( $auth_header, 7 );
-		}
-
-		if ( ! $access_token ) {
-			// OIDC UserInfo Endpoint (OIDC Core §5.3 — https://openid.net/specs/openid-connect-core-1_0.html#UserInfo).
-			// Bearer token in the Authorization header is the primary auth mechanism (RFC 6750 —
-			// https://datatracker.ietf.org/doc/html/rfc6750). The query-string fallback is for clients
-			// that cannot set headers. Either way, this is a direct API call with no browser session;
-			// WordPress nonces are not applicable here.
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$access_token = isset( $_GET['access_token'] ) ? sanitize_text_field( wp_unslash( $_GET['access_token'] ) ) : '';
-		}
-
-		if ( ! $access_token ) {
-			header( 'WWW-Authenticate: Bearer realm="OIDC"' );
-			$this->send_json_error( array( 'error' => 'invalid_token', 'error_description' => 'Bearer token required.' ), 401 );
-			return;
-		}
-
-		$payload = KEYSTONE_OIDC_Token_Manager::validate_access_token( $access_token );
-		if ( is_wp_error( $payload ) ) {
-			header( 'WWW-Authenticate: Bearer error="' . esc_attr( $payload->get_error_code() ) . '"' );
-			$this->send_json_error( array( 'error' => $payload->get_error_code(), 'error_description' => $payload->get_error_message() ), 401 );
-			return;
-		}
-
-		$user_id = intval( $payload['sub'] );
-		$scopes  = isset( $payload['scope'] ) ? explode( ' ', $payload['scope'] ) : array();
-		$user    = get_userdata( $user_id );
-
-		if ( ! $user ) {
-			$this->send_json_error( array( 'error' => 'invalid_token', 'error_description' => 'User not found.' ), 401 );
-			return;
-		}
-
-		$userinfo = array( 'sub' => (string) $user_id );
-
-		if ( in_array( 'profile', $scopes, true ) ) {
-			$userinfo['name']               = $user->display_name;
-			$userinfo['given_name']         = $user->first_name;
-			$userinfo['family_name']        = $user->last_name;
-			$userinfo['preferred_username'] = $user->user_login;
-		}
-
-		if ( in_array( 'email', $scopes, true ) ) {
-			$userinfo['email']          = $user->user_email;
-			$userinfo['email_verified'] = true;
-		}
-
-		$this->send_json( $userinfo );
 	}
 
 	// -------------------------------------------------------------------------
