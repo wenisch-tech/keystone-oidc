@@ -39,27 +39,23 @@ $keystone_oidc_kid    = KEYSTONE_OIDC_Token_Manager::get_key_id();
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'Discovery Endpoint', 'keystone-oidc' ); ?></th>
-				<td><code><?php echo esc_html( KEYSTONE_OIDC_Provider::get_issuer_root_url( '.well-known/openid-configuration' ) ); ?></code></td>
+				<td><code><?php echo esc_html( KEYSTONE_OIDC_Provider::get_endpoint_url( '.well-known/openid-configuration' ) ); ?></code></td>
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'Authorization Endpoint', 'keystone-oidc' ); ?></th>
-				<td><code><?php echo esc_html( KEYSTONE_OIDC_Provider::get_protocol_endpoint_url( 'auth' ) ); ?></code></td>
+				<td><code><?php echo esc_html( KEYSTONE_OIDC_Provider::get_endpoint_url( 'oauth/authorize' ) ); ?></code></td>
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'Token Endpoint', 'keystone-oidc' ); ?></th>
-				<td><code><?php echo esc_html( KEYSTONE_OIDC_Provider::get_protocol_endpoint_url( 'token' ) ); ?></code></td>
+				<td><code><?php echo esc_html( KEYSTONE_OIDC_Provider::get_endpoint_url( 'oauth/token' ) ); ?></code></td>
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'UserInfo Endpoint', 'keystone-oidc' ); ?></th>
-				<td><code><?php echo esc_html( KEYSTONE_OIDC_Provider::get_protocol_endpoint_url( 'userinfo' ) ); ?></code></td>
+				<td><code><?php echo esc_html( KEYSTONE_OIDC_Provider::get_endpoint_url( 'oauth/userinfo' ) ); ?></code></td>
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'JWKS URI', 'keystone-oidc' ); ?></th>
-				<td><code><?php echo esc_html( KEYSTONE_OIDC_Provider::get_protocol_endpoint_url( 'certs' ) ); ?></code></td>
-			</tr>
-			<tr>
-				<th><?php esc_html_e( 'Legacy Discovery Endpoint', 'keystone-oidc' ); ?></th>
-				<td><code><?php echo esc_html( KEYSTONE_OIDC_Provider::get_endpoint_url( '.well-known/openid-configuration' ) ); ?></code></td>
+				<td><code><?php echo esc_html( KEYSTONE_OIDC_Provider::get_endpoint_url( 'oauth/jwks' ) ); ?></code></td>
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'Current Key ID (kid)', 'keystone-oidc' ); ?></th>

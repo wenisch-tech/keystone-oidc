@@ -522,7 +522,15 @@ class KEYSTONE_OIDC_Token_Manager {
 	 * @return string
 	 */
 	public static function get_issuer() {
-		return get_option( 'keystone_oidc_issuer', get_bloginfo( 'url' ) );
+		$site_url       = untrailingslashit( get_bloginfo( 'url' ) );
+		$default_issuer = untrailingslashit( trailingslashit( $site_url ) . 'wenisch-tech/keystone-oidc' );
+		$issuer         = untrailingslashit( get_option( 'keystone_oidc_issuer', '' ) );
+
+		if ( '' === $issuer || $site_url === $issuer ) {
+			return $default_issuer;
+		}
+
+		return $issuer;
 	}
 
 	/**
