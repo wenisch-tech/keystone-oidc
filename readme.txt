@@ -20,7 +20,7 @@ Keystone OIDC transforms your WordPress installation into a fully-featured **Ope
 * **RS256 JWT** signed access tokens and ID tokens
 * **Admin UI** to create and manage multiple OIDC clients
 * **Client secret management** – generate and reset secrets securely (shown only once)
-* **OIDC Discovery** endpoint (`/wenisch-tech/keystone-oidc/.well-known/openid-configuration`) for automatic client configuration
+* **OIDC Discovery** endpoint (`/.well-known/openid-configuration`) for automatic client configuration from an issuer URI
 * **Standard scopes**: `openid`, `profile`, `email`
 * **Refresh tokens** for long-lived sessions
 * **Zero additional configuration** after install – just create a client and you're ready
@@ -29,11 +29,11 @@ Keystone OIDC transforms your WordPress installation into a fully-featured **Ope
 
 | Endpoint | URL |
 |---|---|
-| Discovery | `/wenisch-tech/keystone-oidc/.well-known/openid-configuration` |
-| Authorization | `/wenisch-tech/keystone-oidc/oauth/authorize` |
-| Token | `/wenisch-tech/keystone-oidc/oauth/token` |
-| UserInfo | `/wenisch-tech/keystone-oidc/oauth/userinfo` |
-| JWKS | `/wenisch-tech/keystone-oidc/oauth/jwks` |
+| Discovery | `/.well-known/openid-configuration` |
+| Authorization | `/protocol/openid-connect/auth` |
+| Token | `/protocol/openid-connect/token` |
+| UserInfo | `/protocol/openid-connect/userinfo` |
+| JWKS | `/protocol/openid-connect/certs` |
 
 = Quick Start =
 

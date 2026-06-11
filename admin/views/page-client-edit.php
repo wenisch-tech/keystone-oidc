@@ -115,7 +115,7 @@ $keystone_oidc_title = $keystone_oidc_is_edit
 				<tr>
 					<th><?php esc_html_e( 'Discovery URL', 'keystone-oidc' ); ?></th>
 					<td>
-						<code id="discovery-url"><?php echo esc_html( KEYSTONE_OIDC_Provider::get_endpoint_url( '.well-known/openid-configuration' ) ); ?></code>
+						<code id="discovery-url"><?php echo esc_html( KEYSTONE_OIDC_Provider::get_issuer_root_url( '.well-known/openid-configuration' ) ); ?></code>
 						<button type="button" class="button button-small wp-oidc-copy-btn" data-target="discovery-url">
 							<?php esc_html_e( 'Copy', 'keystone-oidc' ); ?>
 						</button>

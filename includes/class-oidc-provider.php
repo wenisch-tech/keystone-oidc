@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class KEYSTONE_OIDC_Provider {
 	const ENDPOINT_BASE_PATH = 'wenisch-tech/keystone-oidc';
+	const ISSUER_PROTOCOL_BASE_PATH = 'protocol/openid-connect';
 
 	/**
 	 * Get endpoint base path relative to site root.
@@ -31,6 +32,33 @@ class KEYSTONE_OIDC_Provider {
 	public static function get_endpoint_url( $relative_path ) {
 		$site_base = trailingslashit( get_bloginfo( 'url' ) );
 		return $site_base . self::get_endpoint_base_path() . ltrim( $relative_path, '/' );
+	}
+
+	/**
+	 * Build an absolute issuer-root endpoint URL.
+	 *
+	 * These endpoints live directly under the configured issuer base so clients
+	 * that only accept an issuer URI can derive them using standard conventions.
+	 *
+	 * @param string $relative_path Endpoint path relative to the issuer root.
+	 * @return string
+	 */
+	public static function get_issuer_root_url( $relative_path = '' ) {
+		$issuer = untrailingslashit( KEYSTONE_OIDC_Token_Manager::get_issuer() );
+		if ( '' === $relative_path ) {
+			return $issuer;
+		}
+		return $issuer . '/' . ltrim( $relative_path, '/' );
+	}
+
+	/**
+	 * Build an absolute protocol endpoint URL below the issuer root.
+	 *
+	 * @param string $relative_path Endpoint path relative to /protocol/openid-connect.
+	 * @return string
+	 */
+	public static function get_protocol_endpoint_url( $relative_path ) {
+		return self::get_issuer_root_url( self::ISSUER_PROTOCOL_BASE_PATH . '/' . ltrim( $relative_path, '/' ) );
 	}
 
 	public function __construct() {
@@ -80,6 +108,14 @@ class KEYSTONE_OIDC_Provider {
 
 		add_rewrite_rule( '^' . $endpoint_base . '/\.well-known/openid-configuration/?$', 'index.php?oidc_endpoint=discovery', 'top' );
 		add_rewrite_rule( '^' . $endpoint_base . '/oauth/jwks/?$', 'index.php?oidc_endpoint=jwks', 'top' );
+		add_rewrite_rule( '^' . $endpoint_base . '/oauth/authorize/?$', 'index.php?rest_route=/keystone-oidc/v1/authorize', 'top' );
+		add_rewrite_rule( '^' . $endpoint_base . '/oauth/token/?$', 'index.php?rest_route=/keystone-oidc/v1/token', 'top' );
+		add_rewrite_rule( '^' . $endpoint_base . '/oauth/userinfo/?$', 'index.php?rest_route=/keystone-oidc/v1/userinfo', 'top' );
+		add_rewrite_rule( '^\.well-known/openid-configuration/?$', 'index.php?oidc_endpoint=discovery', 'top' );
+		add_rewrite_rule( '^' . self::ISSUER_PROTOCOL_BASE_PATH . '/auth/?$', 'index.php?rest_route=/keystone-oidc/v1/authorize', 'top' );
+		add_rewrite_rule( '^' . self::ISSUER_PROTOCOL_BASE_PATH . '/token/?$', 'index.php?rest_route=/keystone-oidc/v1/token', 'top' );
+		add_rewrite_rule( '^' . self::ISSUER_PROTOCOL_BASE_PATH . '/userinfo/?$', 'index.php?rest_route=/keystone-oidc/v1/userinfo', 'top' );
+		add_rewrite_rule( '^' . self::ISSUER_PROTOCOL_BASE_PATH . '/certs/?$', 'index.php?oidc_endpoint=jwks', 'top' );
 	}
 
 	/**
@@ -162,10 +198,10 @@ class KEYSTONE_OIDC_Provider {
 
 		$discovery = array(
 			'issuer'                                => $issuer,
-			'authorization_endpoint'                => rest_url( 'keystone-oidc/v1/authorize' ),
-			'token_endpoint'                        => rest_url( 'keystone-oidc/v1/token' ),
-			'userinfo_endpoint'                     => rest_url( 'keystone-oidc/v1/userinfo' ),
-			'jwks_uri'                              => self::get_endpoint_url( 'oauth/jwks' ),
+			'authorization_endpoint'                => self::get_protocol_endpoint_url( 'auth' ),
+			'token_endpoint'                        => self::get_protocol_endpoint_url( 'token' ),
+			'userinfo_endpoint'                     => self::get_protocol_endpoint_url( 'userinfo' ),
+			'jwks_uri'                              => self::get_protocol_endpoint_url( 'certs' ),
 			'scopes_supported'                      => array( 'openid', 'profile', 'email' ),
 			'response_types_supported'              => array( 'code' ),
 			'grant_types_supported'                 => array( 'authorization_code', 'refresh_token' ),
@@ -240,7 +276,7 @@ class KEYSTONE_OIDC_Provider {
 					'code_challenge_method' => $code_challenge_method,
 				)
 			);
-			$authorize_url = add_query_arg( $authorize_params, rest_url( 'keystone-oidc/v1/authorize' ) );
+			$authorize_url = add_query_arg( $authorize_params, self::get_protocol_endpoint_url( 'auth' ) );
 			wp_safe_redirect( wp_login_url( $authorize_url ) );
 			exit;
 		}
@@ -424,7 +460,7 @@ class KEYSTONE_OIDC_Provider {
 					'code_challenge_method' => $code_challenge_method,
 				)
 			),
-			rest_url( 'keystone-oidc/v1/authorize' )
+			self::get_protocol_endpoint_url( 'auth' )
 		);
 		include KEYSTONE_OIDC_PLUGIN_DIR . 'includes/views/consent.php';
 		exit;
