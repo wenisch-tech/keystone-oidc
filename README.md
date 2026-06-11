@@ -264,6 +264,8 @@ All URLs are relative to your WordPress site root (e.g. `https://example.com`).
 | **UserInfo** | GET | `/wenisch-tech/keystone-oidc/oauth/userinfo` |
 | **JWKS** | GET | `/wenisch-tech/keystone-oidc/oauth/jwks` |
 
+For compatibility with clients that still derive Keycloak-style paths from the custom issuer URI, the provider also routes `/wenisch-tech/keystone-oidc/protocol/openid-connect/auth`, `/token`, `/userinfo`, and `/certs` to the same handlers. These aliases are not advertised in discovery; new clients should use the discovery document and `/oauth/*` endpoints.
+
 ### `GET /wenisch-tech/keystone-oidc/.well-known/openid-configuration`
 
 Returns the [OIDC Discovery document](https://openid.net/specs/openid-connect-discovery-1_0.html) as JSON. Point your OIDC client library at this URL for automatic configuration.

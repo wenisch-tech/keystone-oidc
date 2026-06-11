@@ -35,6 +35,8 @@ Keystone OIDC transforms your WordPress installation into a fully-featured **Ope
 | UserInfo | `/wenisch-tech/keystone-oidc/oauth/userinfo` |
 | JWKS | `/wenisch-tech/keystone-oidc/oauth/jwks` |
 
+Compatibility aliases are also routed under `/wenisch-tech/keystone-oidc/protocol/openid-connect/*` for clients that still derive Keycloak-style paths from the custom issuer URI. These aliases are not advertised in discovery.
+
 = Quick Start =
 
 1. Install and activate the plugin

@@ -87,6 +87,13 @@ class KEYSTONE_OIDC_Provider {
 		add_rewrite_rule( '^' . $endpoint_base . '/oauth/token/?$', 'index.php?oidc_endpoint=token', 'top' );
 		add_rewrite_rule( '^' . $endpoint_base . '/oauth/userinfo/?$', 'index.php?oidc_endpoint=userinfo', 'top' );
 		add_rewrite_rule( '^' . $endpoint_base . '/oauth/jwks/?$', 'index.php?oidc_endpoint=jwks', 'top' );
+
+		// Compatibility for clients that derive Keycloak-style paths from the
+		// custom issuer URI. Discovery intentionally advertises only /oauth/*.
+		add_rewrite_rule( '^' . $endpoint_base . '/protocol/openid-connect/auth/?$', 'index.php?oidc_endpoint=authorize', 'top' );
+		add_rewrite_rule( '^' . $endpoint_base . '/protocol/openid-connect/token/?$', 'index.php?oidc_endpoint=token', 'top' );
+		add_rewrite_rule( '^' . $endpoint_base . '/protocol/openid-connect/userinfo/?$', 'index.php?oidc_endpoint=userinfo', 'top' );
+		add_rewrite_rule( '^' . $endpoint_base . '/protocol/openid-connect/certs/?$', 'index.php?oidc_endpoint=jwks', 'top' );
 	}
 
 	/**
