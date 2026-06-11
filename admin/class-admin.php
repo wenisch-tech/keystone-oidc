@@ -150,6 +150,30 @@ class KEYSTONE_OIDC_Admin {
 		include KEYSTONE_OIDC_PLUGIN_DIR . 'admin/views/page-settings.php';
 	}
 
+	/**
+	 * Build an unescaped admin URL for redirecting to a client edit view.
+	 *
+	 * wp_nonce_url() returns an HTML-escaped URL, which is not suitable for
+	 * Location headers because &amp; breaks subsequent query arguments.
+	 *
+	 * @param string $client_id Client ID.
+	 * @param array  $args      Additional query arguments.
+	 * @return string
+	 */
+	private function get_client_redirect_url( $client_id, array $args = array() ) {
+		return add_query_arg(
+			array_merge(
+				array(
+					'page'      => 'wp-oidc-clients',
+					'client_id' => $client_id,
+					'_wpnonce'  => wp_create_nonce( 'keystone_oidc_view_client' ),
+				),
+				$args
+			),
+			admin_url( 'admin.php' )
+		);
+	}
+
 	// -------------------------------------------------------------------------
 	// Handlers
 	// -------------------------------------------------------------------------
@@ -178,7 +202,7 @@ class KEYSTONE_OIDC_Admin {
 				admin_url( 'admin.php' )
 			);
 			if ( $client_id ) {
-				$redirect_url = wp_nonce_url( $redirect_url, 'keystone_oidc_view_client' );
+				$redirect_url = add_query_arg( '_wpnonce', wp_create_nonce( 'keystone_oidc_view_client' ), $redirect_url );
 			}
 			wp_safe_redirect( $redirect_url );
 			exit;
@@ -190,10 +214,10 @@ class KEYSTONE_OIDC_Admin {
 			// Update existing.
 			$result = KEYSTONE_OIDC_Client_Manager::update_client( $client_id, $name, $uris, $scopes );
 			if ( is_wp_error( $result ) ) {
-				wp_safe_redirect( wp_nonce_url( add_query_arg( array( 'page' => 'wp-oidc-clients', 'client_id' => $client_id, 'error' => 'db_error' ), admin_url( 'admin.php' ) ), 'keystone_oidc_view_client' ) );
+				wp_safe_redirect( $this->get_client_redirect_url( $client_id, array( 'error' => 'db_error' ) ) );
 				exit;
 			}
-			wp_safe_redirect( wp_nonce_url( add_query_arg( array( 'page' => 'wp-oidc-clients', 'client_id' => $client_id, 'updated' => '1' ), admin_url( 'admin.php' ) ), 'keystone_oidc_view_client' ) );
+			wp_safe_redirect( $this->get_client_redirect_url( $client_id, array( 'updated' => '1' ) ) );
 		} else {
 			// Create new.
 			$result = KEYSTONE_OIDC_Client_Manager::create_client( $name, $uris, $scopes );
@@ -206,17 +230,7 @@ class KEYSTONE_OIDC_Admin {
 			set_transient( 'keystone_oidc_new_secret_' . $result['client_id'], $result['client_secret'], 300 );
 
 			wp_safe_redirect(
-				wp_nonce_url(
-					add_query_arg(
-						array(
-							'page'      => 'wp-oidc-clients',
-							'client_id' => $result['client_id'],
-							'created'   => '1',
-						),
-						admin_url( 'admin.php' )
-					),
-					'keystone_oidc_view_client'
-				)
+				$this->get_client_redirect_url( $result['client_id'], array( 'created' => '1' ) )
 			);
 		}
 		exit;
@@ -249,14 +263,14 @@ class KEYSTONE_OIDC_Admin {
 		$result    = KEYSTONE_OIDC_Client_Manager::reset_secret( $client_id );
 
 		if ( is_wp_error( $result ) ) {
-			wp_safe_redirect( wp_nonce_url( add_query_arg( array( 'page' => 'wp-oidc-clients', 'client_id' => $client_id, 'error' => 'reset_failed' ), admin_url( 'admin.php' ) ), 'keystone_oidc_view_client' ) );
+			wp_safe_redirect( $this->get_client_redirect_url( $client_id, array( 'error' => 'reset_failed' ) ) );
 			exit;
 		}
 
 		// Store new plaintext secret in a transient for one-time display.
 		set_transient( 'keystone_oidc_new_secret_' . $client_id, $result, 300 );
 
-		wp_safe_redirect( wp_nonce_url( add_query_arg( array( 'page' => 'wp-oidc-clients', 'client_id' => $client_id, 'secret_reset' => '1' ), admin_url( 'admin.php' ) ), 'keystone_oidc_view_client' ) );
+		wp_safe_redirect( $this->get_client_redirect_url( $client_id, array( 'secret_reset' => '1' ) ) );
 		exit;
 	}
 
