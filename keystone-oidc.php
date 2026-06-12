@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Keystone OIDC
- * Plugin URI: https://github.com/wenisch-tech/keystone-oidc
+ * Plugin URI: https://github.com/wenisch-tech/wordpress-keystone-oidc
  * Description: Turn your WordPress site into an OpenID Connect (OIDC) identity provider. Manage clients through the admin panel.
  * Version: 1.0.0
  * Requires at least: 5.6

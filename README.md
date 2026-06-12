@@ -1,7 +1,7 @@
 ﻿# Keystone OIDC
 
-[![Release](https://github.com/wenisch-tech/keystone-oidc/actions/workflows/ci.yml/badge.svg)](https://github.com/wenisch-tech/keystone-oidc/actions/workflows/ci.yml)
-[![Latest Release](https://img.shields.io/github/v/release/wenisch-tech/keystone-oidc?label=release)](https://github.com/wenisch-tech/keystone-oidc/releases/latest)
+[![Release](https://github.com/wenisch-tech/wordpress-keystone-oidc/actions/workflows/ci.yml/badge.svg)](https://github.com/wenisch-tech/wordpress-keystone-oidc/actions/workflows/ci.yml)
+[![Latest Release](https://img.shields.io/github/v/release/wenisch-tech/wordpress-keystone-oidc?label=release)](https://github.com/wenisch-tech/wordpress-keystone-oidc/releases/latest)
 
 ![Keystone OIDC](assets/banner-1544x500.png)
 
@@ -74,7 +74,7 @@ Pretty permalinks must be **enabled** in WordPress (`Settings → Permalinks`). 
 
 ### Option A – Upload the ZIP (recommended)
 
-1. Download the latest `keystone-oidc-x.y.z.zip` from the [Releases page](https://github.com/wenisch-tech/keystone-oidc/releases).
+1. Download the latest `keystone-oidc-x.y.z.zip` from the [Releases page](https://github.com/wenisch-tech/wordpress-keystone-oidc/releases).
 2. In your WordPress admin go to **Plugins → Add New → Upload Plugin**.
 3. Choose the downloaded ZIP and click **Install Now**.
 4. Click **Activate Plugin**.

@@ -71,7 +71,7 @@ Roles are not currently emitted. The plugin does not expose WordPress roles or c
 2. Activate the plugin through the **Plugins** menu
 3. Navigate to **OIDC Provider** in the admin sidebar to create your first client
 
-Alternatively, download the `keystone-oidc.zip` from the [GitHub Releases](https://github.com/wenisch-tech/keystone-oidc/releases) page and upload it via **Plugins → Add New → Upload Plugin**.
+Alternatively, download the `keystone-oidc.zip` from the [GitHub Releases](https://github.com/wenisch-tech/wordpress-keystone-oidc/releases) page and upload it via **Plugins → Add New → Upload Plugin**.
 
 == Frequently Asked Questions ==
 
