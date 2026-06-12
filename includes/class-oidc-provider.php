@@ -36,8 +36,30 @@ class KEYSTONE_OIDC_Provider {
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_rewrite_rules' ) );
 		add_filter( 'query_vars', array( $this, 'add_query_vars' ) );
+		add_filter( 'redirect_canonical', array( $this, 'disable_canonical_redirect_for_oidc' ), 10, 2 );
 		add_action( 'template_redirect', array( $this, 'handle_request' ) );
 		add_action( 'wp_scheduled_delete', array( 'KEYSTONE_OIDC_Token_Manager', 'cleanup_expired' ) );
+	}
+
+	/**
+	 * Prevent WordPress from adding trailing-slash redirects on OIDC endpoints.
+	 *
+	 * OAuth clients send Authorization headers to token/userinfo endpoints. A
+	 * canonical 301 can cause those headers to be dropped by the HTTP client.
+	 *
+	 * @param string|false $redirect_url  Canonical redirect URL.
+	 * @param string       $requested_url Requested URL.
+	 * @return string|false
+	 */
+	public function disable_canonical_redirect_for_oidc( $redirect_url, $requested_url ) {
+		$requested_path = wp_parse_url( $requested_url, PHP_URL_PATH );
+		$base_path      = wp_parse_url( home_url( '/' . self::get_endpoint_base_path() ), PHP_URL_PATH );
+
+		if ( $requested_path && $base_path && 0 === strpos( untrailingslashit( $requested_path ), untrailingslashit( $base_path ) ) ) {
+			return false;
+		}
+
+		return $redirect_url;
 	}
 
 	/**
