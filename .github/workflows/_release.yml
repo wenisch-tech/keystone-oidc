@@ -27,6 +27,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref_name }}
 
       - name: Install release tools
         run: |
@@ -56,6 +59,38 @@ jobs:
           if ! grep -q '[^[:space:]]' /tmp/release-changelog.md; then
             echo '* Maintenance release.' > /tmp/release-changelog.md
           fi
+
+          awk -v version="${VERSION}" '
+            BEGIN {
+              in_changelog = 0
+              skipping_version = 0
+            }
+            /^== Changelog ==$/ {
+              in_changelog = 1
+              print
+              next
+            }
+            /^== [^=].* ==$/ {
+              if (in_changelog) {
+                in_changelog = 0
+              }
+              skipping_version = 0
+              print
+              next
+            }
+            in_changelog && $0 == "= " version " =" {
+              skipping_version = 1
+              next
+            }
+            skipping_version && /^= .* =$/ {
+              skipping_version = 0
+            }
+            skipping_version {
+              next
+            }
+            { print }
+          ' readme.txt > readme.txt.clean
+          mv readme.txt.clean readme.txt
 
           awk -v version="${VERSION}" -v changelog_file="/tmp/release-changelog.md" '
             /^== Changelog ==$/ {
@@ -87,6 +122,44 @@ jobs:
               print
             }
           ' readme.txt > changelog.txt
+
+      - name: Commit release version and changelog
+        run: |
+          set -euo pipefail
+          VERSION="${{ inputs.version }}"
+          TAG="${{ inputs.tag }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add keystone-oidc.php readme.txt changelog.txt
+
+          if git diff --cached --quiet; then
+            echo "No release metadata changes to commit."
+          else
+            git commit -m "chore(release): ${VERSION} [skip ci]"
+            git push origin "HEAD:${{ github.ref_name }}"
+          fi
+
+          LOCAL_TAG_SHA="$(git rev-parse "${TAG}^{commit}" 2>/dev/null || true)"
+          HEAD_SHA="$(git rev-parse HEAD)"
+          REMOTE_TAG_SHA="$(git ls-remote --refs origin "refs/tags/${TAG}" | awk '{print $1}')"
+
+          if [ -n "${REMOTE_TAG_SHA}" ]; then
+            if [ "${REMOTE_TAG_SHA}" = "${HEAD_SHA}" ]; then
+              echo "Tag ${TAG} already exists on the release commit."
+              exit 0
+            fi
+            echo "Remote tag ${TAG} already exists on ${REMOTE_TAG_SHA}, expected ${HEAD_SHA}."
+            exit 1
+          fi
+
+          if [ -n "${LOCAL_TAG_SHA}" ]; then
+            git tag -d "${TAG}"
+          fi
+
+          git tag -a "${TAG}" -m "Release ${VERSION}"
+          git push origin "refs/tags/${TAG}"
 
       - name: Create plugin ZIP
         run: |

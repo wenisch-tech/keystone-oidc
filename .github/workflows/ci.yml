@@ -35,14 +35,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Bump version and generate changelog
+      - name: Compute version and generate changelog
         id: tag_version
         uses: mathieudutour/github-tag-action@a22cf08638b34d5badda920f9daf6e72c477b07b # v6.2
         with:
           github_token: ${{ github.token }}
           release_branches: main
           default_bump: patch
-          dry_run: ${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}
+          dry_run: true
 
       - name: Derive plugin version
         id: version
