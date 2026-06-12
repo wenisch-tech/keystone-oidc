@@ -103,6 +103,7 @@ Yes, both `S256` and `plain` code challenge methods are supported.
 
 ### Bug Fixes
 
+* updated release versioning and changelog creation ([98cfb30](https://github.com/wenisch-tech/wordpress-keystone-oidc/commit/98cfb3062232f96346646f915a90198f69b17f51))
 * updated repository links ([f46b2b6](https://github.com/wenisch-tech/wordpress-keystone-oidc/commit/f46b2b6f2012cd348eab5e73f5ca9410f0efc406))
 * updatet generation of changelog. ([357bded](https://github.com/wenisch-tech/wordpress-keystone-oidc/commit/357bded5f6cd824859dfc4710d72bdbec60da983))
 
