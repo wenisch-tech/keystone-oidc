@@ -12,6 +12,11 @@ on:
       changelog:
         required: true
         type: string
+    secrets:
+      SVN_USERNAME:
+        required: true
+      SVN_PASSWORD:
+        required: true
 
 jobs:
   release:
@@ -22,6 +27,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Install release tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rsync subversion zip
 
       - name: Update plugin version in PHP header
         run: |
@@ -34,17 +44,63 @@ jobs:
           VERSION="${{ inputs.version }}"
           sed -i "s/^Stable tag:.*/Stable tag: ${VERSION}/" readme.txt
 
+      - name: Generate WordPress.org changelog
+        env:
+          RELEASE_CHANGELOG: ${{ inputs.changelog }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ inputs.version }}"
+
+          printf '%s\n' "${RELEASE_CHANGELOG}" > /tmp/release-changelog.md
+
+          if ! grep -q '[^[:space:]]' /tmp/release-changelog.md; then
+            echo '* Maintenance release.' > /tmp/release-changelog.md
+          fi
+
+          awk -v version="${VERSION}" -v changelog_file="/tmp/release-changelog.md" '
+            /^== Changelog ==$/ {
+              print
+              print ""
+              print "= " version " ="
+              while ((getline line < changelog_file) > 0) {
+                print line
+              }
+              close(changelog_file)
+              next
+            }
+            { print }
+          ' readme.txt > readme.txt.tmp
+          mv readme.txt.tmp readme.txt
+
+          awk '
+            /^== Changelog ==$/ {
+              in_changelog = 1
+              print
+              next
+            }
+            /^== [^=].* ==$/ {
+              if (in_changelog) {
+                exit
+              }
+            }
+            in_changelog {
+              print
+            }
+          ' readme.txt > changelog.txt
+
       - name: Create plugin ZIP
         run: |
+          set -euo pipefail
           VERSION="${{ inputs.version }}"
           PLUGIN_DIR="keystone-oidc"
           ARCHIVE="keystone-oidc-${VERSION}.zip"
 
+          rm -rf "/tmp/${PLUGIN_DIR}"
           mkdir -p "/tmp/${PLUGIN_DIR}"
           rsync -a \
             --exclude='.git' \
             --exclude='.github' \
-            --exclude='.assets' \
+            --exclude='assets' \
             --exclude='.gitignore' \
             --exclude='docs' \
             --exclude='*.zip' \
@@ -83,3 +139,65 @@ jobs:
           files: ${{ env.archive }}
           draft: false
           prerelease: false
+
+      - name: Deploy to WordPress.org SVN
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ inputs.version }}"
+          SVN_URL="https://plugins.svn.wordpress.org/keystone-oidc"
+          SVN_DIR="/tmp/wordpress-svn"
+          ASSET_STAGING="/tmp/wordpress-assets"
+
+          rm -rf "${SVN_DIR}" "${ASSET_STAGING}"
+          svn checkout "${SVN_URL}" "${SVN_DIR}" \
+            --username "${SVN_USERNAME}" \
+            --password "${SVN_PASSWORD}" \
+            --non-interactive
+          mkdir -p "${SVN_DIR}/trunk" "${SVN_DIR}/tags" "${SVN_DIR}/assets"
+
+          rsync -a --delete \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='assets' \
+            --exclude='.gitignore' \
+            --exclude='docs' \
+            --exclude='*.zip' \
+            . "${SVN_DIR}/trunk/"
+
+          mkdir -p "${ASSET_STAGING}"
+          rsync -a --delete \
+            --include='*/' \
+            --include='banner-772x250.png' \
+            --include='banner-1544x500.png' \
+            --include='icon-128x128.png' \
+            --include='icon-256x256.png' \
+            --include='screenshot-*.png' \
+            --exclude='*' \
+            assets/ "${ASSET_STAGING}/"
+          rsync -a --delete "${ASSET_STAGING}/" "${SVN_DIR}/assets/"
+
+          cd "${SVN_DIR}"
+
+          if [ -d "tags/${VERSION}" ]; then
+            svn rm "tags/${VERSION}"
+          fi
+          svn copy trunk "tags/${VERSION}"
+
+          svn add --force trunk tags assets --auto-props --parents --depth infinity -q
+          svn status | awk '/^!/ { print substr($0, 9) }' | while IFS= read -r missing_path; do
+            svn rm "${missing_path}"
+          done
+
+          find assets -type f -name '*.png' -print0 | xargs -0 -r svn propset svn:mime-type image/png
+
+          if svn status | grep -q '^[AMDR?!~]'; then
+            svn commit -m "Release ${VERSION}" \
+              --username "${SVN_USERNAME}" \
+              --password "${SVN_PASSWORD}" \
+              --non-interactive
+          else
+            echo "No WordPress.org SVN changes to commit."
+          fi

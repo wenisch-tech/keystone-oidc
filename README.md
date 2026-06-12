@@ -3,7 +3,7 @@
 [![Release](https://github.com/wenisch-tech/keystone-oidc/actions/workflows/ci.yml/badge.svg)](https://github.com/wenisch-tech/keystone-oidc/actions/workflows/ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/wenisch-tech/keystone-oidc?label=release)](https://github.com/wenisch-tech/keystone-oidc/releases/latest)
 
-![Keystone OIDC](.assets/banner-1544x500.png)
+![Keystone OIDC](assets/banner-1544x500.png)
 
 > Turn your WordPress site into a fully featured **OpenID Connect (OIDC) identity provider**.
 
@@ -392,8 +392,10 @@ Every push to `main` automatically bumps the version (patch by default, followin
 
 1. Computes the next semver tag and generates a changelog.
 2. Patches the `Version:` header in `keystone-oidc.php` and `Stable tag:` in `readme.txt`.
-3. Creates a `keystone-oidc-x.y.z.zip` archive with `keystone-oidc/` as the root folder (the layout WordPress expects).
-4. Publishes a GitHub Release with the ZIP attached as a downloadable asset.
+3. Generates the current WordPress.org changelog entry and `changelog.txt`.
+4. Creates a `keystone-oidc-x.y.z.zip` archive with `keystone-oidc/` as the root folder.
+5. Publishes a GitHub Release with the ZIP attached as a downloadable asset.
+6. Publishes plugin code to WordPress.org SVN `trunk/` and `tags/x.y.z/`, and directory listing images to top-level SVN `assets/`.
 
 No manual tagging is required — just push to `main` and the pipeline handles everything.
 
