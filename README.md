@@ -348,6 +348,24 @@ Returns claims for the authenticated user. Requires a valid Bearer token.
 Authorization: Bearer <access_token>
 ```
 
+Example response for `openid profile email`:
+
+```json
+{
+  "sub": "42",
+  "name": "Jane Doe",
+  "given_name": "Jane",
+  "family_name": "Doe",
+  "preferred_username": "jane",
+  "email": "jane@example.com",
+  "email_verified": true
+}
+```
+
+`sub` is the WordPress user ID as a string, `preferred_username` is the WordPress `user_login`, and `email` is the WordPress `user_email`.
+
+Roles are not included in the current UserInfo response or ID token. Keystone OIDC does not expose WordPress roles or capabilities as OIDC claims yet.
+
 ### `GET /wenisch-tech/keystone-oidc/oauth/jwks`
 
 Returns the public RSA key in [JWKS format](https://datatracker.ietf.org/doc/html/rfc7517). Use this to verify RS256-signed JWTs without contacting the token endpoint.
@@ -363,6 +381,8 @@ Returns the public RSA key in [JWKS format](https://datatracker.ietf.org/doc/htm
 | `email` | `email`, `email_verified` |
 
 The `sub` claim is always the WordPress user's numeric ID (as a string), ensuring stable, durable identity.
+
+Roles are not emitted today. If a relying party needs authorization data, manage roles in the client application or add a dedicated roles/groups claim in a future provider version.
 
 ---
 

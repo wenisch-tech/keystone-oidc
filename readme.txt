@@ -37,6 +37,26 @@ Keystone OIDC transforms your WordPress installation into a fully-featured **Ope
 
 Compatibility aliases are also routed under `/wenisch-tech/keystone-oidc/protocol/openid-connect/*` for clients that still derive Keycloak-style paths from the custom issuer URI. These aliases are not advertised in discovery.
 
+= UserInfo Example =
+
+For `openid profile email`, `/wenisch-tech/keystone-oidc/oauth/userinfo` returns:
+
+```json
+{
+  "sub": "42",
+  "name": "Jane Doe",
+  "given_name": "Jane",
+  "family_name": "Doe",
+  "preferred_username": "jane",
+  "email": "jane@example.com",
+  "email_verified": true
+}
+```
+
+`sub` is the WordPress user ID as a string, `preferred_username` is the WordPress `user_login`, and `email` is the WordPress `user_email`.
+
+Roles are not currently emitted. The plugin does not expose WordPress roles or capabilities in UserInfo or ID tokens.
+
 = Quick Start =
 
 1. Install and activate the plugin
