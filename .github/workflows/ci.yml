@@ -15,7 +15,7 @@ permissions:
 # ─────────────────────────────────────────────────────────────────────────────
 # Orchestrator: computes version/tag on every push, then delegates to the
 # reusable release workflow when merging to main.
-#   _release.yml — version bump, zip build, GitHub release
+#   _release.yml — version bump, changelog, zip build, GitHub release, WordPress.org SVN publish
 # ─────────────────────────────────────────────────────────────────────────────
 
 jobs:
