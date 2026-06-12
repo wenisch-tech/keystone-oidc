@@ -193,7 +193,9 @@ jobs:
 
           find assets -type f -name '*.png' -print0 | xargs -0 -r svn propset svn:mime-type image/png
 
-          if svn status | grep -q '^[AMDR?!~]'; then
+          SVN_STATUS="$(svn status)"
+          if [ -n "${SVN_STATUS}" ]; then
+            printf '%s\n' "${SVN_STATUS}"
             svn commit -m "Release ${VERSION}" \
               --username "${SVN_USERNAME}" \
               --password "${SVN_PASSWORD}" \
