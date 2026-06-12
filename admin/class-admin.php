@@ -19,6 +19,7 @@ class KEYSTONE_OIDC_Admin {
 		add_action( 'admin_post_keystone_oidc_reset_secret', array( $this, 'handle_reset_secret' ) );
 		add_action( 'admin_post_keystone_oidc_rotate_keys', array( $this, 'handle_rotate_keys' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( KEYSTONE_OIDC_PLUGIN_FILE ), array( $this, 'add_plugin_action_links' ) );
+		add_filter( 'plugin_row_meta', array( $this, 'add_plugin_row_meta' ), 10, 2 );
 	}
 
 	// -------------------------------------------------------------------------
@@ -38,6 +39,27 @@ class KEYSTONE_OIDC_Admin {
 			esc_html__( 'Settings', 'keystone-oidc' )
 		);
 		return array_merge( array( $settings_link ), $links );
+	}
+
+	/**
+	 * Add meta links to the plugin row on the plugins screen.
+	 *
+	 * @param array  $links Existing plugin row meta links.
+	 * @param string $file  Plugin file path relative to the plugins directory.
+	 * @return array
+	 */
+	public function add_plugin_row_meta( $links, $file ) {
+		if ( plugin_basename( KEYSTONE_OIDC_PLUGIN_FILE ) !== $file ) {
+			return $links;
+		}
+
+		$links[] = sprintf(
+			'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+			esc_url( 'https://github.com/wenisch-tech/wordpress-keystone-oidc/issues/new' ),
+			esc_html__( 'Report a bug', 'keystone-oidc' )
+		);
+
+		return $links;
 	}
 
 	// -------------------------------------------------------------------------
