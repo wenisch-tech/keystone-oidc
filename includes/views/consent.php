@@ -64,6 +64,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<form method="POST" action="<?php echo esc_url( $authorize_url ); ?>">
 			<?php wp_nonce_field( 'oidc_authorize' ); ?>
+			<?php if ( $state ) : ?>
+				<input type="hidden" name="state" value="<?php echo esc_attr( $state ); ?>">
+			<?php endif; ?>
 			<?php if ( $nonce ) : ?>
 				<input type="hidden" name="nonce" value="<?php echo esc_attr( $nonce ); ?>">
 			<?php endif; ?>
