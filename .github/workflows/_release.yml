@@ -141,7 +141,6 @@ jobs:
             git push origin "HEAD:${{ github.ref_name }}"
           fi
 
-          LOCAL_TAG_SHA="$(git rev-parse "${TAG}^{commit}" 2>/dev/null || true)"
           HEAD_SHA="$(git rev-parse HEAD)"
           REMOTE_TAG_SHA="$(git ls-remote --refs origin "refs/tags/${TAG}" | awk '{print $1}')"
 
@@ -154,7 +153,7 @@ jobs:
             exit 1
           fi
 
-          if [ -n "${LOCAL_TAG_SHA}" ]; then
+          if git show-ref --verify --quiet "refs/tags/${TAG}"; then
             git tag -d "${TAG}"
           fi
 
