@@ -27,13 +27,13 @@ Keystone OIDC transforms your WordPress installation into a fully-featured **Ope
 
 = Endpoints =
 
-| Endpoint | URL |
-|---|---|
-| Discovery | `/wenisch-tech/keystone-oidc/.well-known/openid-configuration` |
-| Authorization | `/wenisch-tech/keystone-oidc/oauth/authorize` |
-| Token | `/wenisch-tech/keystone-oidc/oauth/token` |
-| UserInfo | `/wenisch-tech/keystone-oidc/oauth/userinfo` |
-| JWKS | `/wenisch-tech/keystone-oidc/oauth/jwks` |
+All URLs are relative to your WordPress site root.
+
+* **Discovery:** `/wenisch-tech/keystone-oidc/.well-known/openid-configuration`
+* **Authorization:** `/wenisch-tech/keystone-oidc/oauth/authorize`
+* **Token:** `/wenisch-tech/keystone-oidc/oauth/token`
+* **UserInfo:** `/wenisch-tech/keystone-oidc/oauth/userinfo`
+* **JWKS:** `/wenisch-tech/keystone-oidc/oauth/jwks`
 
 Compatibility aliases are also routed under `/wenisch-tech/keystone-oidc/protocol/openid-connect/*` for clients that still derive Keycloak-style paths from the custom issuer URI. These aliases are not advertised in discovery.
 
@@ -41,17 +41,15 @@ Compatibility aliases are also routed under `/wenisch-tech/keystone-oidc/protoco
 
 For `openid profile email`, `/wenisch-tech/keystone-oidc/oauth/userinfo` returns:
 
-```
-{
-  "sub": "42",
-  "name": "Jane Doe",
-  "given_name": "Jane",
-  "family_name": "Doe",
-  "preferred_username": "jane",
-  "email": "jane@example.com",
-  "email_verified": true
-}
-```
+    {
+      "sub": "42",
+      "name": "Jane Doe",
+      "given_name": "Jane",
+      "family_name": "Doe",
+      "preferred_username": "jane",
+      "email": "jane@example.com",
+      "email_verified": true
+    }
 
 `sub` is the WordPress user ID as a string, `preferred_username` is the WordPress `user_login`, and `email` is the WordPress `user_email`.
 
@@ -113,21 +111,17 @@ Yes, both `S256` and `plain` code challenge methods are supported.
 
 
 = 2.2.2 =
-### [2.2.2](https://github.com/wenisch-tech/wordpress-keystone-oidc/compare/v2.2.1...v2.2.2) (2026-06-12)
+Released on 2026-06-12.
 
-
-### Bug Fixes
+= Bug Fixes =
 
 * updated release versioning and changelog creation ([98cfb30](https://github.com/wenisch-tech/wordpress-keystone-oidc/commit/98cfb3062232f96346646f915a90198f69b17f51))
 * updated repository links ([f46b2b6](https://github.com/wenisch-tech/wordpress-keystone-oidc/commit/f46b2b6f2012cd348eab5e73f5ca9410f0efc406))
 * updatet generation of changelog. ([357bded](https://github.com/wenisch-tech/wordpress-keystone-oidc/commit/357bded5f6cd824859dfc4710d72bdbec60da983))
 
-
-### Documentation
+= Documentation =
 
 * added "Report a bug" button to plugin page ([8281f6c](https://github.com/wenisch-tech/wordpress-keystone-oidc/commit/8281f6c5cfd9474e785c06eaf562e1a2cb84f47d))
-
-
 
 = 1.0.0 =
 * Initial release
