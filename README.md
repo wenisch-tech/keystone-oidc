@@ -391,7 +391,7 @@ Roles are not emitted today. If a relying party needs authorization data, manage
 Every push to `main` automatically bumps the version (patch by default, following [Conventional Commits](https://www.conventionalcommits.org/)) via the [CI workflow](.github/workflows/ci.yml) which:
 
 1. Computes the next semver tag and generates a changelog.
-2. Patches the `Version:` header in `keystone-oidc.php` and `Stable tag:` in `readme.txt`.
+2. Patches the `Version:` header in `keystone-oidc.php`, `Stable tag:` in `readme.txt`, and `Tested up to:` from the latest WordPress release.
 3. Generates the current WordPress.org changelog entry and `changelog.txt`.
 4. Creates a `keystone-oidc-x.y.z.zip` archive with `keystone-oidc/` as the root folder.
 5. Publishes a GitHub Release with the ZIP attached as a downloadable asset.

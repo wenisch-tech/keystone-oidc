@@ -47,6 +47,22 @@ jobs:
           VERSION="${{ inputs.version }}"
           sed -i "s/^Stable tag:.*/Stable tag: ${VERSION}/" readme.txt
 
+      - name: Update tested WordPress version in readme.txt
+        run: |
+          set -euo pipefail
+
+          WORDPRESS_VERSION="$(
+            curl -fsSL "https://api.wordpress.org/core/version-check/1.7/" |
+            python3 -c 'import json, sys; print(json.load(sys.stdin)["offers"][0]["current"])'
+          )"
+
+          if ! printf '%s\n' "${WORDPRESS_VERSION}" | grep -Eq '^[0-9]+(\.[0-9]+){1,2}$'; then
+            echo "Unexpected WordPress version from API: ${WORDPRESS_VERSION}" >&2
+            exit 1
+          fi
+
+          sed -i "s/^Tested up to:.*/Tested up to: ${WORDPRESS_VERSION}/" readme.txt
+
       - name: Generate WordPress.org changelog
         env:
           RELEASE_CHANGELOG: ${{ inputs.changelog }}
