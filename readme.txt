@@ -3,7 +3,7 @@ Contributors: jfwenisch
 Tags: oidc, openid-connect, sso, authentication, oauth2
 Requires at least: 5.6
 Tested up to: 7.0
-Stable tag: 2.2.2
+Stable tag: 2.3.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,21 @@ All previously issued tokens will immediately become invalid. Use the **Settings
 Yes, both `S256` and `plain` code challenge methods are supported.
 
 == Changelog ==
+
+= 2.3.0 =
+## [2.3.0](https://github.com/wenisch-tech/wordpress-keystone-oidc/compare/v2.2.2...v2.3.0) (2026-06-14)
+
+
+### Features
+
+* consent-screen now uses theme default colors if available ([24beefe](https://github.com/wenisch-tech/wordpress-keystone-oidc/commit/24beefead5ac2fab30e0945c58af3f009a733c1c))
+
+
+### Bug Fixes
+
+* ensure compability with wordpress v7 ([36f0d50](https://github.com/wenisch-tech/wordpress-keystone-oidc/commit/36f0d5040ee72d8f2ad9b76ff07da25ed5649bce))
+
+
 
 = 2.2.2 =
 ### [2.2.2](https://github.com/wenisch-tech/wordpress-keystone-oidc/compare/v2.2.1...v2.2.2) (2026-06-12)
