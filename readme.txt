@@ -25,6 +25,14 @@ Keystone OIDC transforms your WordPress installation into a fully-featured **Ope
 * **Refresh tokens** for long-lived sessions
 * **Zero additional configuration** after install – just create a client and you're ready
 
+= Quick Start =
+
+1. Install and activate the plugin
+2. Go to **OIDC Provider → Add Client** in your WordPress admin
+3. Enter your application name and redirect URI(s)
+4. Copy the generated **Client ID** and **Client Secret** (shown once)
+5. Configure your OIDC client application with the discovery URL shown in the settings
+
 = Endpoints =
 
 All URLs are relative to your WordPress site root.
@@ -55,13 +63,6 @@ For `openid profile email`, `/wenisch-tech/keystone-oidc/oauth/userinfo` returns
 
 Roles are not currently emitted. The plugin does not expose WordPress roles or capabilities in UserInfo or ID tokens.
 
-= Quick Start =
-
-1. Install and activate the plugin
-2. Go to **OIDC Provider → Add Client** in your WordPress admin
-3. Enter your application name and redirect URI(s)
-4. Copy the generated **Client ID** and **Client Secret** (shown once)
-5. Configure your OIDC client application with the discovery URL shown in the settings
 
 == Installation ==
 
