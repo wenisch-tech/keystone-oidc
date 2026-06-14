@@ -10,12 +10,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title><?php esc_html_e( 'Authorize Application', 'keystone-oidc' ); ?> &mdash; <?php echo esc_html( get_bloginfo( 'name' ) ); ?></title>
 	<link rel="stylesheet" href="<?php echo esc_url( KEYSTONE_OIDC_PLUGIN_URL . 'includes/css/consent.css?ver=' . KEYSTONE_OIDC_VERSION ); ?>">
-</head>
-<body>
-<main class="auth-shell">
-	<div class="orb orb-one" aria-hidden="true"></div>
-	<div class="orb orb-two" aria-hidden="true"></div>
+	<?php
+	$theme_styles           = array();
+	$theme_background_color = get_background_color();
+	$theme_text_color       = get_header_textcolor();
 
+	if ( $theme_background_color ) {
+		$theme_background_color = sanitize_hex_color( '#' . $theme_background_color );
+		if ( $theme_background_color ) {
+			$theme_styles[] = '--keystone-oidc-bg: ' . $theme_background_color;
+		}
+	}
+
+	if ( $theme_text_color && 'blank' !== $theme_text_color ) {
+		$theme_text_color = sanitize_hex_color( '#' . $theme_text_color );
+		if ( $theme_text_color ) {
+			$theme_styles[] = '--keystone-oidc-text: ' . $theme_text_color;
+		}
+	}
+	?>
+	<?php if ( $theme_styles ) : ?>
+		<style>:root { <?php echo esc_html( implode( '; ', $theme_styles ) ); ?>; }</style>
+	<?php endif; ?>
+</head>
+<body class="keystone-oidc-consent">
+<main class="auth-shell">
 	<section class="card" aria-labelledby="keystone-oidc-title">
 		<div class="brand-row">
 			<div class="site-icon" aria-hidden="true">
