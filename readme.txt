@@ -2,7 +2,7 @@
 Contributors: jfwenisch
 Tags: oidc, openid-connect, sso, authentication, oauth2
 Requires at least: 5.6
-Tested up to: 6.9
+Tested up to: 7.0
 Stable tag: 2.2.2
 Requires PHP: 7.4
 License: GPLv2 or later
@@ -41,7 +41,7 @@ Compatibility aliases are also routed under `/wenisch-tech/keystone-oidc/protoco
 
 For `openid profile email`, `/wenisch-tech/keystone-oidc/oauth/userinfo` returns:
 
-```json
+```
 {
   "sub": "42",
   "name": "Jane Doe",
