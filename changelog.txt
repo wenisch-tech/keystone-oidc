@@ -1,5 +1,17 @@
 == Changelog ==
 
+= 2.3.1 =
+### [2.3.1](https://github.com/wenisch-tech/wordpress-keystone-oidc/compare/v2.3.0...v2.3.1) (2026-06-14)
+
+
+### Documentation
+
+* ensured tested up to is properly set ([3f2ab22](https://github.com/wenisch-tech/wordpress-keystone-oidc/commit/3f2ab22b79a25e4130236a92c0b50c3b7afcc139))
+* quickstart section in readme ([20cd0a4](https://github.com/wenisch-tech/wordpress-keystone-oidc/commit/20cd0a412caa28ca8ef07198fd121480d03b8a5a))
+* updated readme ([960f77f](https://github.com/wenisch-tech/wordpress-keystone-oidc/commit/960f77fba6bdfa96b3637d32aa4c99a2835fe87b))
+
+
+
 = 2.3.0 =
 ## [2.3.0](https://github.com/wenisch-tech/wordpress-keystone-oidc/compare/v2.2.2...v2.3.0) (2026-06-14)
 
@@ -16,21 +28,17 @@
 
 
 = 2.2.2 =
-### [2.2.2](https://github.com/wenisch-tech/wordpress-keystone-oidc/compare/v2.2.1...v2.2.2) (2026-06-12)
+Released on 2026-06-12.
 
-
-### Bug Fixes
+= Bug Fixes =
 
 * updated release versioning and changelog creation ([98cfb30](https://github.com/wenisch-tech/wordpress-keystone-oidc/commit/98cfb3062232f96346646f915a90198f69b17f51))
 * updated repository links ([f46b2b6](https://github.com/wenisch-tech/wordpress-keystone-oidc/commit/f46b2b6f2012cd348eab5e73f5ca9410f0efc406))
 * updatet generation of changelog. ([357bded](https://github.com/wenisch-tech/wordpress-keystone-oidc/commit/357bded5f6cd824859dfc4710d72bdbec60da983))
 
-
-### Documentation
+= Documentation =
 
 * added "Report a bug" button to plugin page ([8281f6c](https://github.com/wenisch-tech/wordpress-keystone-oidc/commit/8281f6c5cfd9474e785c06eaf562e1a2cb84f47d))
-
-
 
 = 1.0.0 =
 * Initial release
